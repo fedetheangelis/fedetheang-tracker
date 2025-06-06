@@ -1,5 +1,5 @@
 // *** SOSTITUISCI QUESTO URL CON QUELLO CHE HAI OTTENUTO DA APPS SCRIPT ***
-const appsScriptWebAppUrl = 'https://script.google.com/macros/s/AKfycbzvRbEUSPdekXiXom7SsrHCpaa09gKQyeEEECQ8e6Q/dev'; 
+const appsScriptWebAppUrl = 'https://script.google.com/macros/s/AKfycbxpjAET6mjwVDrEXyyFcrHqcKzwD156cNQSSd5dJ-ugS2C2ra3N63YXmYuCL172_r9y/exec'; 
 
 const gameListDiv = document.getElementById('gameList');
 const searchInput = document.getElementById('searchInput');
