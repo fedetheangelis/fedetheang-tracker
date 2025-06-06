@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Mio Tracker Videogiochi</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.png"> </head>
+<body>
+    <header>
+        <h1>Il Mio Tracker Videogiochi</h1>
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="Cerca giochi...">
+            <select id="statusFilter">
+                <option value="">Tutti gli Stati</option>
+                <option value="Attivo">Attivo</option>
+                <option value="Online/Senza Fine">Online/Senza Fine</option>
+                <option value="Messo in Pausa">Messo in Pausa</option>
+                <option value="Finito">Finito</option>
+                </select>
+            <select id="platformFilter">
+                <option value="">Tutte le Piattaforme</option>
+                </select>
+        </div>
+    </header>
+    <main id="gameList">
+        <p class="loading">Caricamento giochi...</p>
+        </main>
+    <footer>
+        <p>&copy; 2025 Il Mio Tracker</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
