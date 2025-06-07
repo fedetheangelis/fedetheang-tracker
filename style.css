@@ -1,281 +1,341 @@
-/* Stili esistenti */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f0f2f5;
+    background-color: #f4f4f4;
     color: #333;
-    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 header {
-    background-color: #2c3e50;
+    background-color: #333;
     color: white;
-    padding: 1.2rem;
+    padding: 15px 20px;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
 }
 
 header h1 {
     margin: 0;
-    font-size: 1.8rem;
+    font-size: 1.8em;
 }
 
-header h1 .header-update-info {
+.header-update-info {
     font-size: 0.7em;
-    color: #b0b0b0;
-    margin-left: 15px;
-    font-weight: normal;
-    white-space: nowrap;
-    display: inline-block;
+    color: #bbb;
+    margin-left: 10px;
 }
 
-.filters {
-    margin-top: 15px;
+.auth-section {
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+    color: #eee;
+}
+
+#authButton {
+    background-color: #4285F4; /* Colore Google */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+#authButton:hover {
+    background-color: #357ae8;
+}
+
+.search-and-filters {
+    display: flex;
+    flex-wrap: wrap; /* Permette agli elementi di andare a capo su schermi piccoli */
     justify-content: center;
     gap: 10px;
+    width: 100%;
+    max-width: 900px;
+    margin-top: 10px;
 }
 
-.filters input, .filters select {
-    padding: 10px;
-    border-radius: 5px;
+#searchInput,
+#statusFilter,
+#platformFilter {
+    padding: 8px;
     border: 1px solid #ddd;
-    font-size: 1rem;
-    background-color: white;
-    color: #333;
+    border-radius: 4px;
+    font-size: 1em;
+    flex-grow: 1; /* Permette agli input di espandersi */
+    min-width: 150px; /* Larghezza minima per evitare che si rimpiccioliscano troppo */
+}
+
+.add-game-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    white-space: nowrap; /* Evita che il testo vada a capo */
+}
+
+.add-game-button:hover {
+    background-color: #218838;
 }
 
 main {
-    padding: 25px 20px;
+    flex-grow: 1;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #666;
+}
+.loading.error {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+
+.game-cards-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
 }
 
 .game-card {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease-in-out;
     display: flex;
     flex-direction: column;
-    padding: 15px;
-    transition: transform 0.2s ease-in-out;
-    position: relative;
-    cursor: pointer; /* Indica che la card è cliccabile */
+    position: relative; /* Per posizionare il bottone elimina */
+    cursor: pointer; /* Indica che è cliccabile per modificare */
 }
 
 .game-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.game-card img {
+    width: 100%;
+    height: 180px; /* Altezza fissa per le copertine */
+    object-fit: cover; /* Assicura che l'immagine copra l'area */
+    display: block;
+    border-bottom: 1px solid #eee;
 }
 
 .game-card .header-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #eee;
+    border-bottom: 1px solid #ddd;
 }
 
-.game-card h2 {
-    font-size: 1.4rem;
+.game-card .header-info h2 {
     margin: 0;
+    font-size: 1.2em;
     color: #333;
     flex-grow: 1;
     text-align: left;
 }
 
 .game-card .status-badge {
-    background-color: #e0e0e0;
-    color: #555;
-    padding: 4px 8px;
+    background-color: #007bff;
+    color: white;
+    padding: 3px 8px;
     border-radius: 5px;
-    font-size: 0.85rem;
-    font-weight: bold;
+    font-size: 0.8em;
     white-space: nowrap;
 }
 
+/* Colori badge stato */
+.game-card.status-MasteratoPlatinato .status-badge { background-color: #8e44ad; } /* Viola scuro */
+.game-card.status-Completato100 .status-badge { background-color: #27ae60; } /* Verde scuro */
+.game-card.status-Finito .status-badge { background-color: #28a745; } /* Verde chiaro */
+.game-card.status-InCorso .status-badge { background-color: #f39c12; } /* Arancione */
+.game-card.status-InPausa .status-badge { background-color: #e67e22; } /* Arancione più scuro */
+.game-card.status-Droppato .status-badge { background-color: #e74c3c; } /* Rosso */
+.game-card.status-OnlineSenzaFine .status-badge { background-color: #3498db; } /* Blu */
+.game-card.status-Archiviato .status-badge { background-color: #7f8c8d; } /* Grigio */
+
+
 .game-card .platform-info {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 10px;
+    padding: 5px 10px;
+    font-size: 0.85em;
+    color: #555;
     text-align: left;
+    border-bottom: 1px solid #eee;
+}
+.game-card .platform-info i {
+    margin-right: 5px;
+    color: #777;
 }
 
 .game-card .card-stats-header {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
-    margin-bottom: 15px;
-    font-size: 1rem;
-    color: #444;
-    gap: 15px;
-    padding-left: 5px;
-}
-
-.game-card .card-stats-header .no-stats-info {
-    font-style: italic;
-    color: #999;
-    font-size: 0.9rem;
-}
-
-.game-card img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 15px;
+    justify-content: space-around;
+    padding: 5px 10px;
+    font-size: 0.8em;
+    color: #777;
+    border-bottom: 1px solid #eee;
+    background-color: #f9f9f9;
 }
 
 .game-card .stats-row {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
+    padding: 10px 5px;
+    font-size: 0.9em;
+    flex-wrap: wrap; /* Consente agli elementi di andare a capo */
+    gap: 5px; /* Spazio tra gli elementi */
 }
 
 .game-card .stat-item {
     display: flex;
     align-items: center;
-    gap: 5px;
-    font-size: 0.9rem;
-    color: #555;
-    margin: 5px;
+    gap: 3px;
+    color: #444;
 }
 
 .game-card .stat-icon {
-    font-size: 1.1rem;
-    color: #7f8c8d;
+    font-size: 1.1em;
+    color: #007bff; /* Colore predefinito per le icone */
+}
+.game-card .stat-icon.gold { color: gold; }
+.game-card .stat-icon.silver { color: silver; }
+.game-card .stat-icon.bronze { color: #cd7f32; } /* Un marrone per il bronzo */
+
+.game-card .dates-info {
+    padding: 5px 10px 10px;
+    font-size: 0.8em;
+    color: #666;
+    border-top: 1px solid #eee;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.game-card .dates-info i {
+    margin-right: 5px;
+    color: #888;
 }
 
 .game-card .description {
-    font-size: 0.95rem;
-    color: #444;
-    text-align: justify;
-    margin-bottom: 15px;
+    padding: 10px;
+    font-size: 0.85em;
+    color: #555;
+    text-align: left;
+    flex-grow: 1; /* Permette alla descrizione di occupare lo spazio disponibile */
+    max-height: 100px; /* Limita l'altezza della recensione nella card */
+    overflow-y: auto; /* Aggiunge scroll se troppo lunga */
+    border-top: 1px solid #eee;
+    background-color: #fafafa;
 }
 
 .game-card .footer-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.85rem;
+    padding: 10px;
+    font-size: 0.75em;
     color: #777;
-    margin-top: auto;
+    text-align: center;
+    border-top: 1px solid #eee;
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Spazio tra gli elementi nel footer */
 }
 
-.game-card .footer-icons span {
-    margin-left: 8px;
+.game-card .footer-info i {
+    margin-right: 3px;
+    color: #888;
 }
 
-.scroll-to-top {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: #28a745;
+.game-card .delete-game-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(220, 53, 69, 0.8); /* Rosso semi-trasparente */
     color: white;
     border: none;
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 2rem;
+    width: 30px;
+    height: 30px;
+    font-size: 0.8em;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     transition: background-color 0.3s ease;
-    z-index: 1000;
+    z-index: 10; /* Assicurati che sia sopra l'immagine */
+    opacity: 0; /* Nascondi di default */
+    pointer-events: none; /* Non intercettare eventi quando nascosto */
 }
 
-.scroll-to-top:hover {
-    background-color: #218838;
+.game-card:hover .delete-game-btn {
+    opacity: 1; /* Mostra al hover della card */
+    pointer-events: auto; /* Riattiva gli eventi */
 }
 
-footer {
-    background-color: #2c3e50;
-    color: white;
-    text-align: center;
-    padding: 1rem;
-    margin-top: 30px;
-    box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+.game-card .delete-game-btn:hover {
+    background-color: rgba(220, 53, 69, 1);
 }
 
-.loading {
-    text-align: center;
-    grid-column: 1 / -1;
-    padding: 20px;
-    font-size: 1.1rem;
-    color: #555;
-}
 
-.loading.error {
-    color: #dc3545;
-}
-
-/* --- NUOVI STILI PER IL MODALE E RAWG API --- */
-
-/* Stile per il bottone Aggiungi Gioco */
-.add-game-button {
-    position: fixed;
-    bottom: 80px; /* Sopra il bottone "torna su" */
-    right: 20px;
-    background-color: #007bff; /* Blu */
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 1.8rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    transition: background-color 0.3s ease;
-    z-index: 999;
-}
-
-.add-game-button:hover {
-    background-color: #0056b3;
-}
-
-/* Stile del Modale (popup) */
+/* Modal Styles */
 .modal {
-    display: none; /* Nascosto di default */
-    position: fixed; /* Posizionamento fisso rispetto alla viewport */
-    z-index: 1001; /* Sopra tutto il resto */
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 100; /* Sit on top */
     left: 0;
     top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto; /* Abilita lo scroll se il contenuto è troppo grande */
-    background-color: rgba(0,0,0,0.6); /* Sfondo semi-trasparente scuro */
-    padding-top: 60px; /* Spazio dall'alto per centrare il modale */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    justify-content: center;
+    align-items: center;
+    padding-top: 50px;
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: 5% auto; /* 5% dall'alto e centrato orizzontalmente */
-    padding: 30px;
+    margin: auto;
+    padding: 20px;
     border: 1px solid #888;
+    width: 90%;
+    max-width: 600px;
     border-radius: 10px;
-    width: 90%; /* Larghezza del contenuto del modale */
-    max-width: 700px; /* Larghezza massima */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     position: relative;
-}
-
-.modal-content h2 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 20px;
+    max-height: 90vh; /* Limita l'altezza del modale */
+    overflow-y: auto; /* Aggiungi scroll se il contenuto è troppo lungo */
 }
 
 .close-button {
@@ -285,8 +345,7 @@ footer {
     font-weight: bold;
     position: absolute;
     top: 10px;
-    right: 20px;
-    cursor: pointer;
+    right: 15px;
 }
 
 .close-button:hover,
@@ -296,77 +355,79 @@ footer {
     cursor: pointer;
 }
 
-/* Stile per il form all'interno del modale */
-#gameForm {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Spazio tra gli elementi del form */
+.modal-content h2 {
+    text-align: center;
+    margin-top: 0;
+    color: #333;
+    margin-bottom: 20px;
 }
 
-#gameForm label {
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
     font-weight: bold;
     color: #555;
-    margin-top: 5px;
 }
 
-#gameForm input[type="text"],
-#gameForm input[type="number"],
-#gameForm textarea,
-#gameForm select {
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
+    width: calc(100% - 22px); /* Larghezza completa meno padding/bordo */
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 1rem;
-    width: calc(100% - 22px); /* Adatta larghezza al padding */
-    box-sizing: border-box; /* Include padding e bordo nella larghezza */
+    font-size: 1em;
+    box-sizing: border-box; /* Include padding e border nella larghezza */
 }
 
-#gameForm textarea {
-    min-height: 80px;
-    resize: vertical;
+.form-group select[multiple] {
+    height: auto; /* Altezza automatica per le selezioni multiple */
+    min-height: 100px; /* Altezza minima per visibilità */
 }
 
-#gameForm button[type="submit"] {
-    background-color: #28a745;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 5px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: background-color 0.3s ease;
-}
-
-#gameForm button[type="submit"]:hover {
-    background-color: #218838;
-}
-
-/* Stili per la ricerca RAWG */
-#gameForm #searchRawgBtn {
-    background-color: #6c757d; /* Grigio */
-    color: white;
-    padding: 8px 15px;
-    border: none;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    cursor: pointer;
+.form-group small {
+    font-size: 0.8em;
+    color: #777;
     margin-top: 5px;
-    align-self: flex-start; /* Allinea a sinistra */
+    display: block;
 }
 
-#gameForm #searchRawgBtn:hover {
+.form-group button {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+    margin-top: 5px;
+}
+.form-group button:hover {
+    background-color: #0056b3;
+}
+
+#searchRawgBtn {
+    margin-left: 10px;
+    background-color: #6c757d;
+}
+#searchRawgBtn:hover {
     background-color: #5a6268;
 }
 
 .rawg-results {
+    border: 1px solid #eee;
     max-height: 200px;
     overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 5px;
     margin-top: 10px;
-    padding: 5px;
+    padding: 10px;
     background-color: #f9f9f9;
+    border-radius: 5px;
 }
 
 .rawg-result-item {
@@ -377,61 +438,109 @@ footer {
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
-
-.rawg-result-item:last-child {
-    border-bottom: none;
-}
-
 .rawg-result-item:hover {
     background-color: #e9e9e9;
 }
-
+.rawg-result-item:last-child {
+    border-bottom: none;
+}
 .rawg-result-item img {
-    width: 60px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     object-fit: cover;
     border-radius: 3px;
     margin-right: 10px;
 }
-
 .rawg-result-item span {
-    font-weight: bold;
+    font-size: 0.9em;
     color: #333;
 }
 
-.preview-cover {
+.form-group .cover-preview {
+    text-align: center;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+.form-group .cover-preview img {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+
+#gameForm button[type="submit"] {
+    display: block;
     width: 100%;
-    max-height: 250px;
-    object-fit: contain; /* Contiene l'immagine senza tagliarla */
-    border-radius: 8px;
-    margin: 15px 0;
-    background-color: #e0e0e0; /* Sfondo per immagini trasparenti */
+    padding: 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
 }
 
-/* Stili per le checkbox inline */
-#gameForm input[type="checkbox"] {
-    margin-right: 8px;
-}
-#gameForm label[for="formPlatinoCompletato"],
-#gameForm label[for="formDigitale"],
-#gameForm label[for="formBacklog"] {
-    display: inline-block;
-    width: auto;
-    margin-right: 20px;
-    font-weight: normal; /* Non in grassetto come le altre label */
+#gameForm button[type="submit"]:hover {
+    background-color: #218838;
 }
 
-/* Media Queries per reattività */
-@media (max-width: 600px) {
-    .modal-content {
-        margin: 10% auto;
-        padding: 20px;
-    }
-    .filters {
+
+/* Scroll to top button */
+#scrollToTopBtn {
+    display: none; /* Hidden by default */
+    position: fixed; /* Fixed position */
+    bottom: 20px; /* Place the button at the bottom of the page */
+    right: 30px; /* Place the button at the right side */
+    z-index: 99; /* Make sure it does not overlap */
+    border: none; /* Remove borders */
+    outline: none; /* Remove outline */
+    background-color: #007bff; /* Set a background color */
+    color: white; /* Text color */
+    cursor: pointer; /* Add a mouse pointer on hover */
+    padding: 15px; /* Some padding */
+    border-radius: 50%; /* Rounded corners */
+    font-size: 18px; /* Increase font size */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    justify-content: center;
+    align-items: center;
+}
+
+#scrollToTopBtn:hover {
+    background-color: #0056b3; /* Darker background on hover */
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .search-and-filters {
         flex-direction: column;
-        align-items: center;
+        align-items: stretch;
     }
-    .filters input, .filters select {
-        width: 90%;
+    #searchInput,
+    #statusFilter,
+    #platformFilter,
+    .add-game-button {
+        width: 100%; /* Prendono tutta la larghezza */
+        margin-bottom: 5px; /* Spazio tra gli elementi */
+    }
+    main {
+        padding: 10px;
+        margin: 10px auto;
+    }
+    .game-cards-container {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        padding: 10px 0;
+    }
+    .game-card .header-info h2 {
+        font-size: 1.1em;
+    }
+    .modal-content {
+        width: 95%;
+        padding: 15px;
     }
 }
