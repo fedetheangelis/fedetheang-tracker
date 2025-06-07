@@ -11,6 +11,10 @@
 <body>
     <header>
         <h1 id="siteTitle">Tracker Videogiochi di FeF</h1>
+        <div class="auth-section">
+            <span id="userStatus">Caricamento...</span>
+            <button id="authButton">Accedi con Google</button>
+        </div>
         <div class="search-and-filters">
             <input type="text" id="searchInput" placeholder="Cerca per titolo...">
             <select id="statusFilter">
@@ -82,7 +86,8 @@
 
                 <div class="form-group">
                     <label for="formPlatform">Piattaforma/e:</label>
-                    <select id="formPlatform" multiple size="5"> <option value="PS1">PS1</option>
+                    <select id="formPlatform" multiple size="5">
+                        <option value="PS1">PS1</option>
                         <option value="PS2">PS2</option>
                         <option value="PS3">PS3</option>
                         <option value="PS4">PS4</option>
@@ -100,7 +105,8 @@
                 
                 <div class="form-group">
                     <label for="formOreDiGioco">Ore di Gioco:</label>
-                    <input type="text" id="formOreDiGioco"> </div>
+                    <input type="text" id="formOreDiGioco">
+                </div>
                 <div class="form-group">
                     <label for="formVotoTotale">Voto Totale (0-100):</label>
                     <input type="number" id="formVotoTotale" min="0" max="100">
@@ -124,7 +130,8 @@
 
                 <div class="form-group">
                     <label for="formReplayCompletati">Replay Completati:</label>
-                    <input type="number" id="formReplayCompletati" min="0"> </div>
+                    <input type="number" id="formReplayCompletati" min="0">
+                </div>
                 <div class="form-group">
                     <label for="formPrimaVoltaGiocato">Prima volta giocato:</label>
                     <input type="text" id="formPrimaVoltaGiocato">
@@ -144,6 +151,38 @@
         </div>
     </div>
 
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+      import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+      // Your web app's Firebase configuration
+      // INCOLLA QUI IL BLOCCO firebaseConfig CHE HAI COPIATO DALLA CONSOLE FIREBASE
+      // Esempio:
+      const firebaseConfig = {
+        apiKey: "YOUR_API_KEY", // <--- SOSTITUISCI CON IL TUO VALORE REALE
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // <--- SOSTITUISCI CON IL TUO VALORE REALE
+        projectId: "YOUR_PROJECT_ID", // <--- SOSTITUISCI CON IL TUO VALORE REALE
+        storageBucket: "YOUR_PROJECT_ID.appspot.com", // <--- SOSTITUISCI CON IL TUO VALORE REALE
+        messagingSenderId: "YOUR_SENDER_ID", // <--- SOSTITUISCI CON IL TUO VALORE REALE
+        appId: "YOUR_APP_ID" // <--- SOSTITUISCI CON IL TUO VALORE REALE
+      };
+
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const dbFirestore = getFirestore(app);
+      const auth = getAuth(app);
+
+      // Rendi le istanze di Firebase disponibili globalmente (o passale alle funzioni)
+      // Questo è un modo semplice per un'app client-side, ma non il più pulito
+      window.dbFirestore = dbFirestore;
+      window.auth = auth;
+      window.GoogleAuthProvider = GoogleAuthProvider;
+      window.onAuthStateChanged = onAuthStateChanged; // Per monitorare lo stato di autenticazione
+
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
