@@ -2,24 +2,26 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: #f0f2f5; /* Sfondo più chiaro e moderno */
     color: #333;
     line-height: 1.6;
 }
 
 header {
-    background-color: #333;
+    background-color: #2c3e50; /* Blu scuro per l'header */
     color: white;
-    padding: 1rem;
+    padding: 1.2rem;
     text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 header h1 {
     margin: 0;
+    font-size: 1.8rem;
 }
 
 .filters {
-    margin-top: 10px;
+    margin-top: 15px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -27,71 +29,173 @@ header h1 {
 }
 
 .filters input, .filters select {
-    padding: 8px;
+    padding: 10px;
     border-radius: 5px;
     border: 1px solid #ddd;
     font-size: 1rem;
+    background-color: white;
+    color: #333;
 }
 
 main {
-    padding: 20px;
+    padding: 25px 20px; /* Più padding generale */
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
+    /* Grid reattiva: minmax(280px, 1fr) per card più larghe */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px; /* Spazio maggiore tra le card */
 }
 
 .game-card {
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 12px; /* Bordi più arrotondati */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Ombra più pronunciata */
     overflow: hidden;
-    text-align: center;
-    padding-bottom: 10px;
+    display: flex; /* Utilizza flexbox per la disposizione interna */
+    flex-direction: column;
+    padding: 15px; /* Padding interno */
+    transition: transform 0.2s ease-in-out; /* Effetto hover */
+    position: relative; /* Per il pulsante "up" */
+}
+
+.game-card:hover {
+    transform: translateY(-5px); /* Leggero sollevamento all'hover */
+}
+
+.game-card .header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.game-card h2 {
+    font-size: 1.4rem;
+    margin: 0;
+    color: #333;
+    flex-grow: 1; /* Permette al titolo di prendere spazio */
+    text-align: left; /* Allinea a sinistra */
+}
+
+.game-card .status-badge {
+    background-color: #e0e0e0;
+    color: #555;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    white-space: nowrap; /* Evita che lo stato vada a capo */
+}
+
+.game-card .platform-info {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+    text-align: left; /* Allinea a sinistra */
+}
+
+.game-card .rating-stars {
+    color: #f39c12; /* Colore oro per le stelle */
+    font-size: 1.2rem;
+    margin-left: 5px;
 }
 
 .game-card img {
     width: 100%;
-    height: 250px; /* Altezza fissa per le copertine */
-    object-fit: cover; /* Assicura che l'immagine copra l'area senza distorsioni */
-    display: block;
+    height: 200px; /* Altezza fissa per le copertine */
+    object-fit: cover;
+    border-radius: 8px; /* Bordi arrotondati anche per l'immagine */
+    margin-bottom: 15px;
 }
 
-.game-card h2 {
-    font-size: 1.2rem;
-    margin: 10px 0 5px;
-    padding: 0 10px;
+.game-card .stats-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap; /* Per adattarsi su schermi piccoli */
 }
 
-.game-card p {
+.game-card .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
     font-size: 0.9rem;
-    color: #666;
-    margin: 0 0 5px;
-    padding: 0 10px;
+    color: #555;
+    margin: 5px; /* Spazio tra gli elementi stat */
 }
 
-.game-card .status {
-    font-weight: bold;
+.game-card .stat-icon {
+    font-size: 1.1rem;
+    color: #7f8c8d; /* Colore grigio per le icone delle statistiche */
 }
 
-/* Colori per lo stato - Assicurati che questi nomi corrispondano ai tuoi stati */
-.game-card.status-Finito .status { color: green; }
-.game-card.status-Backlog .status { color: orange; } /* Se hai uno stato "Backlog" */
-.game-card.status-Attivo .status { color: blue; }
-.game-card.status-OnlineSenzaFine .status { color: purple; }
-.game-card.status-MessoinPausa .status { color: gray; }
-/* Aggiungi altri stili per i tuoi stati, se ce ne sono altri nel foglio */
+.game-card .description {
+    font-size: 0.95rem;
+    color: #444;
+    text-align: justify;
+    margin-bottom: 15px;
+}
+
+.game-card .footer-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #777;
+    margin-top: auto; /* Spinge il footer in basso */
+}
+
+.game-card .footer-icons span {
+    margin-left: 8px; /* Spazio tra le icone del footer */
+}
+
+/* Bottone "Scorri in alto" */
+.scroll-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #28a745; /* Verde vivido */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease;
+    z-index: 1000; /* Assicura che sia sopra gli altri elementi */
+}
+
+.scroll-to-top:hover {
+    background-color: #218838;
+}
 
 footer {
-    background-color: #333;
+    background-color: #2c3e50;
     color: white;
     text-align: center;
     padding: 1rem;
-    margin-top: 20px;
+    margin-top: 30px;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
 }
 
 .loading {
     text-align: center;
     grid-column: 1 / -1; /* Centra su tutte le colonne */
+    padding: 20px;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+.loading.error {
+    color: #dc3545; /* Colore rosso per gli errori */
 }
 
 /* Stile per le immagini placeholder (se non c'è una copertina) */
