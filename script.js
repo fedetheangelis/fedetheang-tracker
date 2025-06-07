@@ -4,13 +4,12 @@ const RAWG_API_URL = 'https://api.rawg.io/api/games';
 
 // IMPORTAZIONI FIREBASE FIRESTORE AGGIORNATE PER SDK MODULARE
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // Elementi DOM
 const gameListDiv = document.getElementById('gameList');
 const searchInput = document.getElementById('searchInput');
 const statusFilter = document.getElementById('statusFilter');
-// Rimosso: const platformFilter = document.getElementById('platformFilter'); <-- Rimosso definitivamente
 const scrollToTopBtn = document.getElementById('scrollToTopBtn');
 const siteTitleElement = document.getElementById('siteTitle');
 const addGameBtn = document.getElementById('addGameBtn');
@@ -27,7 +26,7 @@ const formGameId = document.getElementById('formGameId');
 const formTitle = document.getElementById('formTitle');
 const formCover = document.getElementById('formCover');
 const formStatus = document.getElementById('formStatus');
-const formPlatform = document.getElementById('formPlatform'); // Questo rimane per il form di aggiunta/modifica
+const formPlatform = document.getElementById('formPlatform');
 const formVotoTotale = document.getElementById('formVotoTotale');
 const formVotoAesthetic = document.getElementById('formVotoAesthetic');
 const formVotoOST = document.getElementById('formVotoOST');
@@ -127,7 +126,6 @@ async function loadGames() {
                 return 0;
             });
             displayGames(allGames);
-            // Rimosso: populateFilters(allGames);
             // Abilita i bottoni se utente loggato
             addGameBtn.style.display = 'inline-block';
             startCsvImportBtn.style.display = 'inline-block';
@@ -147,7 +145,6 @@ async function loadGames() {
     } else {
         allGames = [];
         displayGames([]);
-        // Rimosso: populateFilters([]); // Pulisci i filtri
         gameListDiv.innerHTML = '<p class="loading">Effettua l\'accesso con Google per visualizzare e gestire i tuoi giochi.</p>';
         // Disabilita i bottoni se non loggato
         addGameBtn.style.display = 'none';
@@ -223,61 +220,53 @@ function displayGames(gamesToDisplay) {
                 </span>
             </div>
         `;
-            <button class="delete-game-btn">Elimina</button>
-        `;
         gameListDiv.appendChild(gameCard);
 
         gameCard.addEventListener('click', (event) => {
-            if (!event.target.classList.contains('delete-game-btn')) {
-                editGame(game.id);
-            }
-        });
-        
-        gameCard.querySelector('.delete-game-btn').addEventListener('click', (event) => {
-            event.stopPropagation();
-            if (confirm(`Sei sicuro di voler eliminare ${game.Titolo}?`)) {
-                deleteGame(game.id);
-            }
+            // Non c'è più il bottone elimina separato, quindi qualsiasi click apre la modifica
+            editGame(game.id);
         });
     });
 }
 
 function applyFilters() {
-    const searchText = searchInput.value.toLowerCase();
-    const selectedStatus = statusFilter.value;
-    // Rimosso: const selectedPlatform = platformFilter.value; // Non più necessario
+    let filteredGames = [...allGames];
 
-    const filteredGames = allGames.filter(game => {
-        const matchesSearch = game.Titolo ? game.Titolo.toLowerCase().includes(searchText) : false;
-        const matchesStatus = selectedStatus ? game.Stato === selectedStatus : true;
-        
-        // Rimosso il controllo del filtro per piattaforma
-        return matchesSearch && matchesStatus; // Modificato per non considerare il filtro piattaforma
+    const searchValue = searchInput.value.toLowerCase();
+    const selectedStatus = statusFilter.value;
+
+    if (searchValue) {
+        filteredGames = filteredGames.filter(game =>
+            (game.Titolo && game.Titolo.toLowerCase().includes(searchValue)) ||
+            (game.Genere && game.Genere.toLowerCase().includes(searchValue)) ||
+            (game.Piattaforma && (Array.isArray(game.Piattaforma) ? game.Piattaforma.some(p => p.toLowerCase().includes(searchValue)) : game.Piattaforma.toLowerCase().includes(searchValue)))
+        );
+    }
+
+    if (selectedStatus && selectedStatus !== 'Tutti') {
+        filteredGames = filteredGames.filter(game => game.Stato === selectedStatus);
+    }
+    
+    // Riordina i giochi filtrati per titolo A-Z
+    filteredGames.sort((a, b) => {
+        const titleA = (a.Titolo || '').toLowerCase();
+        const titleB = (b.Titolo || '').toLowerCase();
+        if (titleA < titleB) return -1;
+        if (titleA > titleB) return 1;
+        return 0;
     });
 
     displayGames(filteredGames);
 }
 
-// Rimosso: function populateFilters(games) { ... } <-- Rimosso definitivamente
-
-// --- Funzioni Modale Form ---
-
 function openModal(game = null) {
-    if (!currentUser) {
-        alert("Devi essere loggato per aggiungere o modificare giochi.");
-        return;
-    }
     gameForm.reset();
-    rawgSearchResults.innerHTML = '';
-    previewCover.src = './placeholder.png';
-    formCover.value = '';
-
-    Array.from(formPlatform.options).forEach(option => {
-        option.selected = false;
-    });
+    previewCover.src = './placeholder.png'; // Reset preview
+    rawgSearchResults.innerHTML = ''; // Clear RAWG results
+    formPlatform.value = ''; // Reset select-multiple
 
     if (game) {
-        formGameId.value = game.id;
+        formGameId.value = game.id; // Firestore ID
         formTitle.value = game.Titolo || '';
         formCover.value = game.Cover || '';
         previewCover.src = game.Cover || './placeholder.png';
@@ -311,7 +300,7 @@ function openModal(game = null) {
         formPrimaVoltaGiocato.value = game.PrimaVoltaGiocato || '';
         formUltimaVoltaFinito.value = game.UltimaVoltaFinito || '';
 
-// Se si sta modificando un gioco esistente, mostra il pulsante Elimina e imposta il suo data-id
+        // Se si sta modificando un gioco esistente, mostra il pulsante Elimina e imposta il suo data-id
         deleteGameInModalBtn.style.display = 'block';
         deleteGameInModalBtn.dataset.id = game.id;
 
@@ -324,64 +313,13 @@ function openModal(game = null) {
     gameModal.style.display = 'block';
 }
 
+
 function closeModal() {
     gameModal.style.display = 'none';
 }
 
-async function searchRawgGame() {
-    const title = formTitle.value.trim();
-    if (!title) {
-        rawgSearchResults.innerHTML = '<p>Inserisci un titolo per la ricerca.</p>';
-        return;
-    }
-    rawgSearchResults.innerHTML = '<p>Ricerca...</p>';
-
-    try {
-        const response = await fetch(`${RAWG_API_URL}?search=${encodeURIComponent(title)}&key=${RAWG_API_KEY}`);
-        if (!response.ok) {
-            throw new Error(`Errore RAWG API: ${response.status}`);
-        }
-        const data = await response.json();
-
-        rawgSearchResults.innerHTML = '';
-        if (data.results && data.results.length > 0) {
-            data.results.forEach(game => {
-                const item = document.createElement('div');
-                item.classList.add('rawg-result-item');
-                item.innerHTML = `
-                    <img src="${game.background_image || './placeholder.png'}" alt="${game.name}">
-                    <span>${game.name} (${game.released ? game.released.substring(0,4) : 'N/D'})</span>
-                `;
-                item.addEventListener('click', () => {
-                    previewCover.src = game.background_image || './placeholder.png';
-                    formCover.value = game.background_image || '';
-                    formTitle.value = game.name || '';
-                    formAnno.value = game.released ? game.released.substring(0, 4) : '';
-                    if (game.genres && game.genres.length > 0) {
-                        formGenere.value = game.genres.map(g => g.name).join(', ');
-                    }
-                    rawgSearchResults.innerHTML = '';
-                });
-                rawgSearchResults.appendChild(item);
-            });
-        } else {
-            rawgSearchResults.innerHTML = '<p>Nessun risultato trovato su RAWG.</p>';
-        }
-
-    }
-    catch (error) {
-        console.error("Errore ricerca RAWG:", error);
-        rawgSearchResults.innerHTML = `<p class="error">Errore nella ricerca RAWG: ${error.message}</p>`;
-    }
-}
-
 async function saveGame(event) {
     event.preventDefault();
-
-    if (!currentUser) {
-        alert("Devi essere loggato per salvare giochi.");
-        return;
-    }
 
     const selectedPlatforms = Array.from(formPlatform.selectedOptions).map(option => option.value);
 
@@ -389,279 +327,280 @@ async function saveGame(event) {
         Titolo: formTitle.value.trim(),
         Cover: formCover.value.trim(),
         Stato: formStatus.value,
-        Piattaforma: selectedPlatforms.length > 0 ? selectedPlatforms : null,
-        VotoTotale: formVotoTotale.value ? parseInt(formVotoTotale.value) : null,
-        VotoAesthetic: formVotoAesthetic.value ? parseInt(formVotoAesthetic.value) : null,
-        VotoOST: formVotoOST.value ? parseInt(formVotoOST.value) : null,
-        OreDiGioco: formOreDiGioco.value.trim(),
-        Anno: formAnno.value ? parseInt(formAnno.value) : null,
+        Piattaforma: selectedPlatforms, // Salva come array
+        VotoTotale: parseFloat(formVotoTotale.value) || null,
+        VotoAesthetic: parseFloat(formVotoAesthetic.value) || null,
+        VotoOST: parseFloat(formVotoOST.value) || null,
+        OreDiGioco: formOreDiGioco.value.trim(), // Testo
+        Anno: parseInt(formAnno.value) || null,
         Genere: formGenere.value.trim(),
-        Costo: formCosto.value ? parseFloat(formCosto.value) : null,
+        Costo: parseFloat(formCosto.value) || null,
         Recensione: formRecensione.value.trim(),
-        VotoDifficolta: formVotoDifficolta.value ? parseInt(formVotoDifficolta.value) : null,
-        PercentualeTrofei: formPercentualeTrofei.value ? parseInt(formPercentualeTrofei.value) : null,
-        
-        ReplayCompletati: formReplayCompletati.value ? parseInt(formReplayCompletati.value) : null,
+        VotoDifficolta: parseFloat(formVotoDifficolta.value) || null,
+        PercentualeTrofei: parseFloat(formPercentualeTrofei.value) || null,
+        ReplayCompletati: parseInt(formReplayCompletati.value) || null,
         PrimaVoltaGiocato: formPrimaVoltaGiocato.value.trim(),
-        UltimaVoltaFinito: formUltimaVoltaFinito.value.trim(),
+        UltimaVoltaFinito: formUltimaVoltaFinito.value.trim()
     };
-
-    if (!gameData.Titolo) {
-        alert('Il titolo è obbligatorio!');
-        return;
-    }
 
     try {
         if (formGameId.value) {
-            gameData.id = formGameId.value;
-            await updateGameInFirestore(gameData);
-            console.log('Gioco aggiornato su Firestore:', gameData);
+            // Modifica gioco esistente
+            await updateGameInFirestore({ id: formGameId.value, ...gameData });
+            console.log("Gioco aggiornato con successo!");
         } else {
-            const newGame = await addGameToFirestore(gameData);
-            console.log('Gioco aggiunto a Firestore:', newGame);
+            // Nuovo gioco
+            await addGameToFirestore(gameData);
+            console.log("Gioco aggiunto con successo!");
         }
         closeModal();
-        loadGames();
+        await loadGames(); // Ricarica la lista dei giochi
     } catch (error) {
-        console.error("Errore nel salvataggio del gioco su Firestore:", error);
-        alert("Errore nel salvataggio del gioco. Controlla la console per dettagli e assicurati di essere loggato.");
+        console.error("Errore nel salvataggio del gioco:", error);
+        alert("Errore nel salvataggio del gioco: " + error.message);
     }
 }
 
-async function editGame(gameId) {
-    if (!currentUser) {
-        alert("Devi essere loggato per modificare giochi.");
-        return;
-    }
-    const gameToEdit = allGames.find(game => game.id === gameId);
+async function editGame(id) {
+    const gameToEdit = allGames.find(game => game.id === id);
     if (gameToEdit) {
         openModal(gameToEdit);
+    } else {
+        alert('Gioco non trovato!');
     }
 }
 
-async function deleteGame(gameId) {
-    if (!currentUser) {
-        alert("Devi essere loggato per eliminare giochi.");
-        return;
-    }
+async function deleteGame(id) {
     try {
-        await deleteGameFromFirestore(gameId);
-        console.log(`Gioco con ID ${gameId} eliminato da Firestore.`);
-        loadGames();
+        await deleteGameFromFirestore(id);
+        console.log("Gioco eliminato con successo!");
+        await loadGames(); // Ricarica la lista dei giochi
     } catch (error) {
-        console.error("Errore nell'eliminazione del gioco da Firestore:", error);
-        alert("Errore nell'eliminazione del gioco. Controlla la console per dettagli.");
+        console.error("Errore nell'eliminazione del gioco:", error);
+        alert("Errore nell'eliminazione del gioco: " + error.message);
     }
 }
 
-// --- Funzione di Importazione da CSV/TSV (adattata per Firebase) ---
-async function importGamesFromCsvOrTsv() {
-    if (!currentUser) {
-        alert("Devi essere loggato per importare giochi.");
+// Funzione per cercare giochi su RAWG API
+async function searchRawgGame() {
+    const query = formTitle.value.trim();
+    if (!query) {
+        rawgSearchResults.innerHTML = '<p>Inserisci un titolo per la ricerca RAWG.</p>';
         return;
     }
 
+    rawgSearchResults.innerHTML = '<p>Ricerca in corso...</p>';
+    try {
+        const response = await fetch(`${RAWG_API_URL}?key=${RAWG_API_KEY}&search=${encodeURIComponent(query)}&page_size=5`);
+        const data = await response.json();
+
+        rawgSearchResults.innerHTML = '';
+        if (data.results && data.results.length > 0) {
+            data.results.forEach(game => {
+                const resultItem = document.createElement('div');
+                resultItem.classList.add('rawg-result-item');
+                resultItem.innerHTML = `
+                    <img src="${game.background_image || './placeholder.png'}" alt="${game.name}">
+                    <span>${game.name} (${game.released ? game.released.substring(0, 4) : 'N/D'})</span>
+                `;
+                resultItem.addEventListener('click', () => {
+                    formTitle.value = game.name;
+                    formCover.value = game.background_image || '';
+                    previewCover.src = game.background_image || './placeholder.png';
+                    formAnno.value = game.released ? game.released.substring(0, 4) : '';
+                    formGenere.value = game.genres.map(g => g.name).join(', ') || '';
+                    
+                    // Seleziona piattaforme se corrispondono ai valori esistenti nel select
+                    const gamePlatforms = game.platforms ? game.platforms.map(p => p.platform.name) : [];
+                    Array.from(formPlatform.options).forEach(option => {
+                        option.selected = gamePlatforms.includes(option.value);
+                    });
+
+                    rawgSearchResults.innerHTML = ''; // Clear results after selection
+                });
+                rawgSearchResults.appendChild(resultItem);
+            });
+        } else {
+            rawgSearchResults.innerHTML = '<p>Nessun risultato trovato su RAWG.</p>';
+        }
+    } catch (error) {
+        console.error("Errore durante la ricerca RAWG:", error);
+        rawgSearchResults.innerHTML = '<p>Errore nella ricerca RAWG. Riprova più tardi.</p>';
+    }
+}
+
+// Funzione per l'importazione CSV/TSV
+async function importGamesFromCsvOrTsv(event) {
+    event.preventDefault();
     const file = csvFileInput.files[0];
     if (!file) {
-        alert("Seleziona un file CSV o TSV da importare.");
+        csvImportStatus.textContent = 'Seleziona un file CSV o TSV.';
         return;
     }
-
-    if (!confirm(`Sei sicuro di voler importare i dati dal file "${file.name}"?\nQuesta operazione aggiungerà nuovi giochi al tuo tracker di Firebase.`)) {
-        return;
-    }
-
-    csvImportStatus.textContent = 'Lettura del file in corso...';
-    startCsvImportBtn.disabled = true;
-    csvFileInput.disabled = true;
 
     const reader = new FileReader();
-
     reader.onload = async (e) => {
         const text = e.target.result;
-        const isCsv = file.name.toLowerCase().endsWith('.csv');
-        const delimiter = isCsv ? ',' : '\t';
-
-        const lines = text.split('\n').filter(line => line.trim() !== '');
+        const lines = text.split('\n').filter(line => line.trim() !== ''); // Filtra righe vuote
         if (lines.length === 0) {
-            alert("Il file è vuoto o non contiene dati.");
-            csvImportStatus.textContent = 'Errore: File vuoto.';
-            startCsvImportBtn.disabled = false;
-            csvFileInput.disabled = false;
+            csvImportStatus.textContent = 'File vuoto o non valido.';
             return;
         }
 
+        const delimiter = text.includes('\t') ? '\t' : ','; //rileva automaticamente se è csv o tsv
         const headers = lines[0].split(delimiter).map(h => h.trim());
-        const sheetGames = [];
 
+        // Mappatura nomi colonne nel file CSV/TSV ai nomi dei campi del nostro modello
+        const headerMap = {
+            'Titolo': 'Titolo',
+            'Cover': 'Cover',
+            'Stato': 'Stato',
+            'Piattaforma': 'Piattaforma',
+            'VotoTotale': 'VotoTotale',
+            'VotoAesthetic': 'VotoAesthetic',
+            'VotoOST': 'VotoOST',
+            'OreDiGioco': 'OreDiGioco',
+            'Anno': 'Anno',
+            'Genere': 'Genere',
+            'Costo': 'Costo',
+            'Recensione': 'Recensione',
+            'VotoDifficolta': 'VotoDifficolta',
+            'PercentualeTrofei': 'PercentualeTrofei',
+            'ReplayCompletati': 'ReplayCompletati',
+            'PrimaVoltaGiocato': 'PrimaVoltaGiocato',
+            'UltimaVoltaFinito': 'UltimaVoltaFinito'
+        };
+
+        const gamesToImport = [];
         for (let i = 1; i < lines.length; i++) {
             const values = lines[i].split(delimiter).map(v => v.trim());
-            if (values.length !== headers.length) {
-                console.warn(`Riga ${i + 1} saltata: numero di colonne non corrispondente all'intestazione.`);
-                continue;
-            }
-            const rowObject = {};
+            const game = {};
             headers.forEach((header, index) => {
-                rowObject[header] = values[index];
+                const propName = headerMap[header];
+                if (propName) {
+                    let value = values[index];
+                    // Conversione tipi di dato
+                    if (['VotoTotale', 'VotoAesthetic', 'VotoOST', 'Costo', 'VotoDifficolta', 'PercentualeTrofei'].includes(propName)) {
+                        game[propName] = parseFloat(value) || null;
+                    } else if (['Anno', 'ReplayCompletati'].includes(propName)) {
+                        game[propName] = parseInt(value) || null;
+                    } else if (propName === 'Piattaforma') {
+                        // Supponiamo che le piattaforme siano separate da ; o , nel CSV
+                        game[propName] = value ? value.split(';').map(p => p.trim()) : [];
+                    } else {
+                        game[propName] = value;
+                    }
+                }
             });
-            sheetGames.push(rowObject);
+            // Assicurati che il titolo esista
+            if (game.Titolo) {
+                gamesToImport.push(game);
+            }
         }
 
-        if (sheetGames.length === 0) {
-            alert("Nessun dato valido trovato nel file per l'importazione dopo l'analisi.");
-            csvImportStatus.textContent = 'Errore: Nessun dato valido.';
-            startCsvImportBtn.disabled = false;
-            csvFileInput.disabled = false;
+        if (gamesToImport.length === 0) {
+            csvImportStatus.textContent = 'Nessun gioco valido trovato nel file.';
             return;
         }
 
-        console.log("Dati letti dal file:", sheetGames);
-        csvImportStatus.textContent = `Analizzati ${sheetGames.length} giochi. Salvataggio in corso su Firebase...`;
-
+        csvImportStatus.textContent = `Importazione di ${gamesToImport.length} giochi...`;
         try {
-            const gamesCollectionRef = getGamesCollectionRef();
-            if (!gamesCollectionRef) throw new Error("Utente non autenticato per l'importazione.");
-
-            let importedCount = 0;
             const batch = writeBatch(window.firestore_db);
+            const gamesCollectionRef = getGamesCollectionRef();
+            if (!gamesCollectionRef) throw new Error("Utente non autenticato. Impossibile importare giochi.");
 
-            for (const sheetGame of sheetGames) {
-                let platforms = [];
-                if (sheetGame.Piattaforma) {
-                    platforms = sheetGame.Piattaforma.split(',').map(p => p.trim()).filter(p => p !== '');
-                }
-
-                const gameData = {
-                    Titolo: sheetGame.Titolo || '',
-                    Cover: sheetGame['Link copertina:'] || '', 
-                    Stato: sheetGame.Stato || 'In Corso',
-                    Piattaforma: platforms.length > 0 ? platforms : null,
-                    OreDiGioco: sheetGame['Ore di gioco'] || '',
-                    VotoTotale: sheetGame['Voto Totale'] ? parseInt(sheetGame['Voto Totale']) : null,
-                    VotoAesthetic: sheetGame['Voto Aesthetic'] ? parseInt(sheetGame['Voto Aesthetic']) : null,
-                    VotoOST: sheetGame['Voto OST'] ? parseInt(sheetGame['Voto OST']) : null,
-                    VotoDifficolta: sheetGame['Difficoltà'] ? parseInt(sheetGame['Difficoltà']) : null, 
-                    Recensione: sheetGame.Recensione || '',
-                    PercentualeTrofei: sheetGame['% Trofei'] ? parseInt(sheetGame['% Trofei']) : null,
-                    ReplayCompletati: sheetGame['Replay completati'] ? parseInt(sheetGame['Replay completati']) : null,
-                    PrimaVoltaGiocato: sheetGame['Prima volta giocato'] || '',
-                    UltimaVoltaFinito: sheetGame['Ultima volta finito'] || '',
-                    Anno: sheetGame.Anno ? parseInt(sheetGame.Anno) : null,
-                    Genere: sheetGame.Genere || '',
-                    Costo: sheetGame.Costo ? parseFloat(sheetGame.Costo) : null,
-                };
-
-                if (gameData.Titolo) {
-                    const newDocRef = doc(gamesCollectionRef);
-                    batch.set(newDocRef, gameData);
-                    importedCount++;
-                }
-            }
+            gamesToImport.forEach(game => {
+                const docRef = doc(gamesCollectionRef); // Crea un nuovo riferimento al documento con ID automatico
+                batch.set(docRef, game);
+            });
 
             await batch.commit();
-            
-            csvImportStatus.textContent = `Importazione completata! ${importedCount} giochi aggiunti a Firebase.`;
-            alert(`Importazione completata! ${importedCount} giochi aggiunti.`);
-            loadGames();
-
-            // Nascondi gli elementi dopo l'importazione
-            csvFileInput.style.display = 'none';
-            startCsvImportBtn.style.display = 'none';
-            csvImportStatus.style.display = 'none';
-
-        } catch (firebaseError) {
-            console.error("Errore nel salvataggio su Firebase:", firebaseError);
-            csvImportStatus.textContent = `Errore di salvataggio: ${firebaseError.message}`;
-        } finally {
-            startCsvImportBtn.disabled = false;
-            csvFileInput.disabled = false;
+            csvImportStatus.textContent = `Importazione completata: ${gamesToImport.length} giochi aggiunti.`;
+            await loadGames(); // Ricarica la lista dei giochi
+        } catch (error) {
+            console.error("Errore durante l'importazione:", error);
+            csvImportStatus.textContent = `Errore durante l'importazione: ${error.message}`;
         }
     };
-
-    reader.onerror = (e) => {
-        console.error("Errore nella lettura del file:", e);
-        csvImportStatus.textContent = `Errore nella lettura del file: ${e.message}`;
-        startCsvImportBtn.disabled = false;
-        csvFileInput.disabled = false;
+    reader.onerror = () => {
+        csvImportStatus.textContent = 'Errore nella lettura del file.';
     };
-
     reader.readAsText(file);
 }
 
-// --- Funzione per Eliminare Tutti i Giochi (adattata per Firebase) ---
+// Funzione per eliminare tutti i giochi (attenzione!)
 async function clearAllGames() {
     if (!currentUser) {
-        alert("Devi essere loggato per eliminare tutti i giochi.");
+        alert("Devi essere autenticato per eliminare tutti i giochi.");
         return;
     }
-
-    if (!confirm("SEI SICURO DI VOLER ELIMINARE TUTTI I GIOCHI DAL TUO TRACKER DI FIREBASE?\nQuesta azione è irreversibile e non può essere annullata!")) {
+    if (!confirm("Sei sicuro di voler ELIMINARE TUTTI i tuoi giochi? Questa azione è irreversibile!")) {
         return;
     }
 
     try {
+        gameListDiv.innerHTML = '<p class="loading">Eliminazione di tutti i giochi...</p>';
         const gamesCollectionRef = getGamesCollectionRef();
-        if (!gamesCollectionRef) throw new Error("Utente non autenticato.");
-
+        if (!gamesCollectionRef) throw new Error("Errore: Collezione giochi non disponibile.");
         const querySnapshot = await getDocs(gamesCollectionRef);
+        
         const batch = writeBatch(window.firestore_db);
-        querySnapshot.docs.forEach((d) => {
-            batch.delete(d.ref);
+        querySnapshot.docs.forEach(docSnapshot => {
+            batch.delete(doc(gamesCollectionRef, docSnapshot.id));
         });
         await batch.commit();
-
-        console.log('Tutti i giochi sono stati eliminati da Firebase.');
-        alert('Tutti i giochi sono stati eliminati con successo!');
-        loadGames();
+        
+        alert("Tutti i giochi sono stati eliminati con successo!");
+        await loadGames();
     } catch (error) {
-        console.error('Errore durante l\'eliminazione di tutti i giochi da Firebase:', error);
-        alert('Errore durante l\'eliminazione di tutti i giochi. Controlla la console per i dettagli.');
+        console.error("Errore durante l'eliminazione di tutti i giochi:", error);
+        alert("Errore durante l'eliminazione di tutti i giochi: " + error.message);
+        await loadGames(); // Ricarica per mostrare lo stato corrente
     }
 }
 
-// --- Gestione Autenticazione Firebase ---
 
-// Funzione per il login con Google
-async function signInWithGoogle() {
-    const provider = new window.GoogleAuthProvider();
-    try {
-        await window.signInWithPopup(window.auth, provider);
-    } catch (error) {
-        console.error("Errore di accesso con Google:", error);
-        alert("Errore durante l'accesso con Google: " + error.message);
+// --- Autenticazione Firebase ---
+const auth = getAuth();
+const provider = new GoogleAuthProvider();
+
+authButton.addEventListener('click', async () => {
+    if (currentUser) {
+        // Log out
+        try {
+            await signOut(auth);
+            console.log("Utente disconnesso.");
+        } catch (error) {
+            console.error("Errore durante il logout:", error);
+        }
+    } else {
+        // Log in
+        try {
+            await signInWithPopup(auth, provider);
+            console.log("Accesso Google riuscito.");
+        } catch (error) {
+            console.error("Errore durante l'accesso Google:", error);
+            alert("Errore durante l'accesso Google: " + error.message);
+        }
     }
-}
+});
 
-// Funzione per il logout
-async function signOutUser() {
-    try {
-        await window.signOut(window.auth);
-    } catch (error) {
-        console.error("Errore durante il logout:", error);
-        alert("Errore durante il logout: " + error.message);
-    }
-}
-
-// Listener per lo stato di autenticazione
-window.onAuthStateChanged(window.auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     if (user) {
         userStatus.textContent = `Loggato come: ${user.displayName || user.email}`;
-        authButton.textContent = "Esci";
-        authButton.onclick = signOutUser;
+        authButton.textContent = 'Logout';
     } else {
-        userStatus.textContent = "Non loggato";
-        authButton.textContent = "Accedi con Google";
-        authButton.onclick = signInWithGoogle;
+        userStatus.textContent = 'Non loggato';
+        authButton.textContent = 'Login con Google';
     }
-    loadGames();
+    await loadGames(); // Ricarica i giochi ogni volta che lo stato di autenticazione cambia
 });
 
 
 // --- Event Listeners ---
 searchInput.addEventListener('input', applyFilters);
 statusFilter.addEventListener('change', applyFilters);
-// Rimosso: platformFilter.addEventListener('change', applyFilters); <-- Rimosso definitivamente
 addGameBtn.addEventListener('click', () => openModal());
 closeButton.addEventListener('click', closeModal);
 window.addEventListener('click', (event) => {
@@ -678,39 +617,37 @@ deleteGameInModalBtn.addEventListener('click', () => {
         deleteGame(gameIdToDelete);
         closeModal(); // Chiudi il modale dopo l'eliminazione
     }
+});
 
-if (startCsvImportBtn) {
+if (startCsvImportBtn) { // Controlla se l'elemento esiste prima di aggiungere l'event listener
     startCsvImportBtn.addEventListener('click', importGamesFromCsvOrTsv);
 }
 
-if (clearAllGamesBtn) {
+if (clearAllGamesBtn) { // Controlla se l'elemento esiste
     clearAllGamesBtn.addEventListener('click', clearAllGames);
 }
 
-// Scroll to Top Button logic
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 200) {
-        scrollToTopBtn.style.display = 'flex';
+// Scroll to top button functionality
+window.onscroll = function() { scrollFunction() };
+
+function scrollFunction() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        scrollToTopBtn.style.display = "flex"; // Usa flex per centrare l'icona
     } else {
-        scrollToTopBtn.style.display = 'none';
+        scrollToTopBtn.style.display = "none";
     }
-});
+}
+
 scrollToTopBtn.addEventListener('click', () => {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
+    document.body.scrollTop = 0; // For Safari
+    document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
 });
 
-// Registra il Service Worker per le funzionalità PWA (offline, installazione)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/fedetheang-tracker/service-worker.js') 
-            .then(registration => {
-                console.log('Service Worker registrato con successo:', registration);
-            })
-            .catch(error => {
-                console.error('Registrazione Service Worker fallita:', error);
-            });
-    });
-}
+// Inizializzazione al caricamento della pagina
+document.addEventListener('DOMContentLoaded', () => {
+    // Il caricamento dei giochi ora avviene in onAuthStateChanged
+    // Ma possiamo impostare la data di aggiornamento qui
+    if (appLastUpdated) {
+        siteTitleElement.innerHTML = `Tracker Videogiochi di FeF <span class="header-update-info">(Aggiornato: ${formatAppUpdateDate(appLastUpdated)})</span>`;
+    }
+});
