@@ -39,20 +39,21 @@ function displayGames(gamesToDisplay) {
         const gameCard = document.createElement('div');
         gameCard.classList.add('game-card');
         
-        // Per la classe dello stato (es. status-Finito)
         if (game.Stato) {
             const statusClass = game.Stato.replace(/[^a-zA-Z0-9]/g, ''); 
             gameCard.classList.add(`status-${statusClass}`);
         }
 
-        // Determina il colore delle stelle in base al voto
         const starsColor = game.Voto >= 90 ? 'gold' : 
                            game.Voto >= 70 ? 'silver' : 
-                           game.Voto >= 50 ? 'bronze' : 'gray'; // Personalizza i colori delle stelle
+                           game.Voto >= 50 ? 'bronze' : 'gray'; 
+
+        // Recupera la data e ora dell'ultimo aggiornamento, se presente
+        const lastUpdate = game['Ultimo aggiornamento'] ? ` <span class="last-update-info">(Aggiornato: ${game['Ultimo aggiornamento']})</span>` : '';
 
         gameCard.innerHTML = `
             <div class="header-info">
-                <h2>${game.Titolo || 'Nome Sconosciuto'}</h2>
+                <h2>${game.Titolo || 'Nome Sconosciuto'}${lastUpdate}</h2>
                 <span class="status-badge">${game.Stato || 'N/D'}</span>
             </div>
             <div class="platform-info">
