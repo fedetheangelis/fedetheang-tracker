@@ -1,25 +1,63 @@
+/* style.css */
+
+/* Dark Mode di Default */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
+    background-color: #1a1a1a; /* Sfondo scuro */
+    color: #f0f0f0; /* Testo chiaro */
+    line-height: 1.6;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
-header {
-    background-color: #333;
+/* Colori generali per dark mode */
+a {
+    color: #87ceeb; /* Un blu chiaro per i link */
+}
+
+button {
+    background-color: #4CAF50; /* Verde per i bottoni principali */
     color: white;
-    padding: 15px 20px;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+    background-color: #333; /* Sfondo scuro per input */
+    color: #f0f0f0; /* Testo chiaro */
+    border: 1px solid #555;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+/* Header */
+header {
+    background-color: #222; /* Sfondo più scuro per l'header */
+    color: white;
+    padding: 20px;
     text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    display: flex;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex; /* Mantenuto il flex per l'allineamento degli elementi */
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    position: relative;
 }
 
 header h1 {
@@ -58,7 +96,7 @@ header h1 {
 
 .search-and-filters {
     display: flex;
-    flex-wrap: wrap; /* Permette agli elementi di andare a capo su schermi piccoli */
+    flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
     width: 100%;
@@ -67,14 +105,15 @@ header h1 {
 }
 
 #searchInput,
-#statusFilter,
-#platformFilter {
+#statusFilter { /* Rimosso #platformFilter */
     padding: 8px;
-    border: 1px solid #ddd;
+    border: 1px solid #555; /* Adattato per dark mode */
     border-radius: 4px;
     font-size: 1em;
-    flex-grow: 1; /* Permette agli input di espandersi */
-    min-width: 150px; /* Larghezza minima per evitare che si rimpiccioliscano troppo */
+    flex-grow: 1;
+    min-width: 150px;
+    background-color: #333; /* Sfondo per dark mode */
+    color: #f0f0f0; /* Testo per dark mode */
 }
 
 .add-game-button {
@@ -86,7 +125,7 @@ header h1 {
     cursor: pointer;
     font-size: 1em;
     transition: background-color 0.3s ease;
-    white-space: nowrap; /* Evita che il testo vada a capo */
+    white-space: nowrap;
 }
 
 .add-game-button:hover {
@@ -98,22 +137,22 @@ main {
     padding: 20px;
     max-width: 1200px;
     margin: 20px auto;
-    background-color: white;
+    background-color: #2b2b2b; /* Sfondo scuro per il main */
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0,0,0,0.4); /* Ombra più scura */
+    color: #f0f0f0; /* Testo chiaro */
 }
 
 .loading {
     text-align: center;
     padding: 20px;
     font-style: italic;
-    color: #666;
+    color: #bbb; /* Testo chiaro */
 }
 .loading.error {
     color: #e74c3c;
     font-weight: bold;
 }
-
 
 .game-cards-container {
     display: grid;
@@ -123,29 +162,29 @@ main {
 }
 
 .game-card {
-    background-color: #fff;
-    border: 1px solid #ddd;
+    background-color: #2b2b2b; /* Sfondo delle card più scuro */
+    border: 1px solid #444; /* Bordo più scuro */
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4); /* Ombra più scura */
     transition: transform 0.2s ease-in-out;
     display: flex;
     flex-direction: column;
-    position: relative; /* Per posizionare il bottone elimina */
-    cursor: pointer; /* Indica che è cliccabile per modificare */
+    position: relative;
+    cursor: pointer;
 }
 
 .game-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.5); /* Ombra più pronunciata al hover */
 }
 
 .game-card img {
     width: 100%;
-    height: 180px; /* Altezza fissa per le copertine */
-    object-fit: cover; /* Assicura che l'immagine copra l'area */
+    height: 180px;
+    object-fit: cover;
     display: block;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #3a3a3a; /* Bordo più scuro */
 }
 
 .game-card .header-info {
@@ -153,20 +192,20 @@ main {
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background-color: #eee;
-    border-bottom: 1px solid #ddd;
+    background-color: #333; /* Sfondo più scuro */
+    border-bottom: 1px solid #444; /* Bordo più scuro */
 }
 
 .game-card .header-info h2 {
     margin: 0;
     font-size: 1.2em;
-    color: #333;
+    color: #f0f0f0; /* Testo chiaro */
     flex-grow: 1;
     text-align: left;
 }
 
 .game-card .status-badge {
-    background-color: #007bff;
+    background-color: #007bff; /* Mantenuto come colore base, ma i colori specifici override */
     color: white;
     padding: 3px 8px;
     border-radius: 5px;
@@ -174,27 +213,26 @@ main {
     white-space: nowrap;
 }
 
-/* Colori badge stato */
-.game-card.status-MasteratoPlatinato .status-badge { background-color: #8e44ad; } /* Viola scuro */
-.game-card.status-Completato100 .status-badge { background-color: #27ae60; } /* Verde scuro */
-.game-card.status-Finito .status-badge { background-color: #28a745; } /* Verde chiaro */
-.game-card.status-InCorso .status-badge { background-color: #f39c12; } /* Arancione */
-.game-card.status-InPausa .status-badge { background-color: #e67e22; } /* Arancione più scuro */
-.game-card.status-Droppato .status-badge { background-color: #e74c3c; } /* Rosso */
-.game-card.status-OnlineSenzaFine .status-badge { background-color: #3498db; } /* Blu */
-.game-card.status-Archiviato .status-badge { background-color: #7f8c8d; } /* Grigio */
-
+/* Colori badge stato per dark mode - più scuri o saturati per contrasto */
+.game-card.status-MasteratoPlatinato .status-badge { background-color: #8e44ad; }
+.game-card.status-Completato100 .status-badge { background-color: #27ae60; }
+.game-card.status-Finito .status-badge { background-color: #28a745; }
+.game-card.status-InCorso .status-badge { background-color: #f39c12; }
+.game-card.status-InPausa .status-badge { background-color: #e67e22; }
+.game-card.status-Droppato .status-badge { background-color: #e74c3c; }
+.game-card.status-OnlineSenzaFine .status-badge { background-color: #3498db; }
+.game-card.status-Archiviato .status-badge { background-color: #7f8c8d; }
 
 .game-card .platform-info {
     padding: 5px 10px;
     font-size: 0.85em;
-    color: #555;
+    color: #bbb; /* Testo più chiaro */
     text-align: left;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #3a3a3a;
 }
 .game-card .platform-info i {
     margin-right: 5px;
-    color: #777;
+    color: #999;
 }
 
 .game-card .card-stats-header {
@@ -202,9 +240,9 @@ main {
     justify-content: space-around;
     padding: 5px 10px;
     font-size: 0.8em;
-    color: #777;
-    border-bottom: 1px solid #eee;
-    background-color: #f9f9f9;
+    color: #bbb;
+    border-bottom: 1px solid #3a3a3a;
+    background-color: #333; /* Sfondo più scuro */
 }
 
 .game-card .stats-row {
@@ -213,30 +251,30 @@ main {
     align-items: center;
     padding: 10px 5px;
     font-size: 0.9em;
-    flex-wrap: wrap; /* Consente agli elementi di andare a capo */
-    gap: 5px; /* Spazio tra gli elementi */
+    flex-wrap: wrap;
+    gap: 5px;
 }
 
 .game-card .stat-item {
     display: flex;
     align-items: center;
     gap: 3px;
-    color: #444;
+    color: #e0e0e0; /* Testo più chiaro */
 }
 
 .game-card .stat-icon {
     font-size: 1.1em;
-    color: #007bff; /* Colore predefinito per le icone */
+    color: #87ceeb; /* Colore più chiaro per le icone */
 }
 .game-card .stat-icon.gold { color: gold; }
 .game-card .stat-icon.silver { color: silver; }
-.game-card .stat-icon.bronze { color: #cd7f32; } /* Un marrone per il bronzo */
+.game-card .stat-icon.bronze { color: #cd7f32; }
 
 .game-card .dates-info {
     padding: 5px 10px 10px;
     font-size: 0.8em;
-    color: #666;
-    border-top: 1px solid #eee;
+    color: #aaa; /* Testo chiaro */
+    border-top: 1px solid #3a3a3a;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -244,98 +282,71 @@ main {
 }
 .game-card .dates-info i {
     margin-right: 5px;
-    color: #888;
+    color: #999;
 }
 
 .game-card .description {
     padding: 10px;
     font-size: 0.85em;
-    color: #555;
+    color: #bbb; /* Testo chiaro */
     text-align: left;
-    flex-grow: 1; /* Permette alla descrizione di occupare lo spazio disponibile */
-    max-height: 100px; /* Limita l'altezza della recensione nella card */
-    overflow-y: auto; /* Aggiunge scroll se troppo lunga */
-    border-top: 1px solid #eee;
-    background-color: #fafafa;
+    flex-grow: 1;
+    max-height: 100px;
+    overflow-y: auto;
+    border-top: 1px solid #3a3a3a;
+    background-color: #333; /* Sfondo più scuro */
 }
 
 .game-card .footer-info {
     padding: 10px;
     font-size: 0.75em;
-    color: #777;
+    color: #aaa; /* Testo chiaro */
     text-align: center;
-    border-top: 1px solid #eee;
-    background-color: #f5f5f5;
+    border-top: 1px solid #3a3a3a;
+    background-color: #333; /* Sfondo più scuro */
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px; /* Spazio tra gli elementi nel footer */
+    gap: 10px;
 }
 
 .game-card .footer-info i {
     margin-right: 3px;
-    color: #888;
+    color: #999;
 }
 
-.game-card .delete-game-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background-color: rgba(220, 53, 69, 0.8); /* Rosso semi-trasparente */
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    font-size: 0.8em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    z-index: 10; /* Assicurati che sia sopra l'immagine */
-    opacity: 0; /* Nascondi di default */
-    pointer-events: none; /* Non intercettare eventi quando nascosto */
-}
-
-.game-card:hover .delete-game-btn {
-    opacity: 1; /* Mostra al hover della card */
-    pointer-events: auto; /* Riattiva gli eventi */
-}
-
-.game-card .delete-game-btn:hover {
-    background-color: rgba(220, 53, 69, 1);
-}
-
+/* RIMOSSO: .game-card .delete-game-btn */
+/* NON DEVE PIÙ ESSERE QUI */
 
 /* Modal Styles */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 100; /* Sit on top */
+    display: none;
+    position: fixed;
+    z-index: 100;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.8); /* Sfondo modale più scuro */
     justify-content: center;
     align-items: center;
     padding-top: 50px;
 }
 
 .modal-content {
-    background-color: #fefefe;
+    background-color: #2b2b2b; /* Sfondo scuro per il modale */
     margin: auto;
     padding: 20px;
-    border: 1px solid #888;
+    border: 1px solid #444; /* Bordo più scuro */
     width: 90%;
     max-width: 600px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
     position: relative;
-    max-height: 90vh; /* Limita l'altezza del modale */
-    overflow-y: auto; /* Aggiungi scroll se il contenuto è troppo lungo */
+    max-height: 90vh;
+    overflow-y: auto;
+    color: #f0f0f0; /* Testo chiaro */
 }
 
 .close-button {
@@ -350,7 +361,7 @@ main {
 
 .close-button:hover,
 .close-button:focus {
-    color: black;
+    color: #f0f0f0; /* Colore al hover */
     text-decoration: none;
     cursor: pointer;
 }
@@ -358,7 +369,7 @@ main {
 .modal-content h2 {
     text-align: center;
     margin-top: 0;
-    color: #333;
+    color: #f0f0f0; /* Testo chiaro */
     margin-bottom: 20px;
 }
 
@@ -370,29 +381,31 @@ main {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
-    color: #555;
+    color: #bbb; /* Testo chiaro */
 }
 
 .form-group input[type="text"],
 .form-group input[type="number"],
 .form-group select,
 .form-group textarea {
-    width: calc(100% - 22px); /* Larghezza completa meno padding/bordo */
+    width: calc(100% - 22px);
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #555; /* Bordo più scuro */
     border-radius: 5px;
     font-size: 1em;
-    box-sizing: border-box; /* Include padding e border nella larghezza */
+    box-sizing: border-box;
+    background-color: #333; /* Sfondo scuro */
+    color: #f0f0f0; /* Testo chiaro */
 }
 
 .form-group select[multiple] {
-    height: auto; /* Altezza automatica per le selezioni multiple */
-    min-height: 100px; /* Altezza minima per visibilità */
+    height: auto;
+    min-height: 100px;
 }
 
 .form-group small {
     font-size: 0.8em;
-    color: #777;
+    color: #999; /* Testo chiaro */
     margin-top: 5px;
     display: block;
 }
@@ -421,12 +434,12 @@ main {
 }
 
 .rawg-results {
-    border: 1px solid #eee;
+    border: 1px solid #444; /* Bordo più scuro */
     max-height: 200px;
     overflow-y: auto;
     margin-top: 10px;
     padding: 10px;
-    background-color: #f9f9f9;
+    background-color: #333; /* Sfondo più scuro */
     border-radius: 5px;
 }
 
@@ -434,12 +447,12 @@ main {
     display: flex;
     align-items: center;
     padding: 8px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #444; /* Bordo più scuro */
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
 .rawg-result-item:hover {
-    background-color: #e9e9e9;
+    background-color: #404040; /* Sfondo hover più scuro */
 }
 .rawg-result-item:last-child {
     border-bottom: none;
@@ -453,21 +466,20 @@ main {
 }
 .rawg-result-item span {
     font-size: 0.9em;
-    color: #333;
+    color: #f0f0f0; /* Testo chiaro */
 }
 
 .form-group .cover-preview {
     text-align: center;
     margin-top: 15px;
     padding: 10px;
-    background-color: #f9f9f9;
+    background-color: #333; /* Sfondo più scuro */
     border-radius: 5px;
 }
 .form-group .cover-preview img {
-    border: 1px solid #ddd;
+    border: 1px solid #444; /* Bordo più scuro */
     border-radius: 5px;
 }
-
 
 #gameForm button[type="submit"] {
     display: block;
@@ -487,32 +499,86 @@ main {
     background-color: #218838;
 }
 
+/* Modifiche per il bottone Elimina nel modale */
+.delete-game-button-modal {
+    background-color: #f44336; /* Rosso per il bottone elimina */
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+    margin-top: 10px; /* Spazio dal bottone Salva */
+    width: 100%; /* Occupa tutta la larghezza */
+    display: none; /* Nascondi di default, gestito via JS */
+}
+
+.delete-game-button-modal:hover {
+    background-color: #da190b;
+}
 
 /* Scroll to top button */
 #scrollToTopBtn {
-    display: none; /* Hidden by default */
-    position: fixed; /* Fixed position */
-    bottom: 20px; /* Place the button at the bottom of the page */
-    right: 30px; /* Place the button at the right side */
-    z-index: 99; /* Make sure it does not overlap */
-    border: none; /* Remove borders */
-    outline: none; /* Remove outline */
-    background-color: #007bff; /* Set a background color */
-    color: white; /* Text color */
-    cursor: pointer; /* Add a mouse pointer on hover */
-    padding: 15px; /* Some padding */
-    border-radius: 50%; /* Rounded corners */
-    font-size: 18px; /* Increase font size */
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 99;
+    border: none;
+    outline: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    padding: 15px;
+    border-radius: 50%;
+    font-size: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4); /* Ombra più scura */
     transition: background-color 0.3s ease, transform 0.2s ease;
     justify-content: center;
     align-items: center;
 }
 
 #scrollToTopBtn:hover {
-    background-color: #0056b3; /* Darker background on hover */
+    background-color: #0056b3;
     transform: translateY(-2px);
 }
+
+/* Utlity section - per raggruppare i bottoni in fondo */
+.utility-section {
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #2b2b2b; /* Sfondo scuro */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    max-width: 800px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.import-export-section,
+.clear-data-section {
+    width: 100%;
+    text-align: center;
+}
+
+.import-export-section label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #f0f0f0; /* Testo chiaro */
+}
+
+.clear-data-section button {
+    margin-top: 10px;
+}
+.clear-data-section p {
+    color: #aaa; /* Testo chiaro per avviso */
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -521,11 +587,10 @@ main {
         align-items: stretch;
     }
     #searchInput,
-    #statusFilter,
-    #platformFilter,
+    #statusFilter, /* Rimosso #platformFilter */
     .add-game-button {
-        width: 100%; /* Prendono tutta la larghezza */
-        margin-bottom: 5px; /* Spazio tra gli elementi */
+        width: 100%;
+        margin-bottom: 5px;
     }
     main {
         padding: 10px;
