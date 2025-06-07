@@ -4,7 +4,8 @@ const RAWG_API_URL = 'https://api.rawg.io/api/games';
 
 // IMPORTAZIONI FIREBASE FIRESTORE AGGIORNATE PER SDK MODULARE
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+// getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged saranno gestiti tramite window dopo firebase-config.js
+import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // Elementi DOM
 const gameListDiv = document.getElementById('gameList');
@@ -563,8 +564,8 @@ async function clearAllGames() {
 
 
 // --- Autenticazione Firebase ---
-const auth = getAuth();
-const provider = new GoogleAuthProvider();
+const auth = window.firebase_auth; // Accede all'istanza auth esposta da firebase-config.js
+const provider = new GoogleAuthProvider(); // GoogleAuthProvider è ancora importato direttamente
 
 authButton.addEventListener('click', async () => {
     if (currentUser) {
