@@ -14,7 +14,8 @@ let allGames = []; // Array per memorizzare tutti i giochi caricati
 // Questa stringa rappresenta la data e ora dell'ultimo aggiornamento del codice dell'app.
 // Ogni volta che carichi nuove modifiche a `script.js` (o ad altri file chiave) su GitHub,
 // AGGIORNA MANUALMENTE questa stringa con la data e ora correnti.
-const appLastUpdated = "07/06/2025 13:00"; // AGGIORNA QUESTA DATA OGNI VOLTA CHE FAI UN CAMBIO SIGNIFICATIVO
+// Data e ora attuali: 7 giugno 2025, 13:03
+const appLastUpdated = "07/06/2025 13:03"; // AGGIORNA QUESTA DATA OGNI VOLTA CHE FAI UN CAMBIO SIGNIFICATIVO
 
 // Funzione per formattare la data (opzionale, se vuoi un formato diverso)
 function formatAppUpdateDate(dateString) {
@@ -69,25 +70,23 @@ function displayGames(gamesToDisplay) {
                            game.Voto >= 70 ? 'silver' :
                            game.Voto >= 50 ? 'bronze' : 'gray';
 
-        // --- NUOVA STRUTTURA DELL'HEADER DELLA CARD CON NOMI COLONNA AGGIORNATI ---
+        // --- NOMI COLONNA AGGIORNATI PER CORRISPONDERE AL TUO FOGLIO ---
         const gameHeaderContent = `
             ${game['Voto Totale'] ? `⭐ ${game['Voto Totale']}` : ''}
-            ${game['Aesthetic'] ? ` 🌌 ${game['Aesthetic']}` : ''}
-            ${game['OST'] ? ` 🎶 ${game['OST']}` : ''}
-            ${game['Ora di gioco'] ? ` ⏳ ${game['Ora di gioco']}h` : ''}
-        `.trim(); // Rimuovi spazi extra all'inizio/fine
+            ${game['Voto Aesthetic'] ? ` 🌌 ${game['Voto Aesthetic']}` : ''} ${game['Voto OST'] ? ` 🎶 ${game['Voto OST']}` : ''}
+            ${game['Ore di gioco'] ? ` ⏳ ${game['Ore di gioco']}h` : ''} `.trim(); // Rimuovi spazi extra all'inizio/fine
 
         gameCard.innerHTML = `
             <div class="header-info">
                 <h2>${game.Titolo || 'Nome Sconosciuto'}</h2>
                 <span class="status-badge">${game.Stato || 'N/D'}</span>
             </div>
-            <div class="card-stats-header">
-                ${gameHeaderContent || '<span class="no-stats-info">Nessun dato statistico</span>'}
-            </div>
             <div class="platform-info">
                 <span><i class="fas fa-desktop"></i> ${game.Piattaforma || 'N/D'}</span>
                 ${game.Digitale === true ? ' | <i class="fas fa-download"></i> Digitale' : ''}
+            </div>
+            <div class="card-stats-header">
+                ${gameHeaderContent || '<span class="no-stats-info">Nessun dato statistico</span>'}
             </div>
             <img src="${game.Cover || '/fedetheang-tracker/placeholder.png'}" alt="${game.Titolo || 'No Image'}">
 
