@@ -36,18 +36,22 @@
     </header>
 
     <main>
-        <div style="margin: 30px auto; text-align: center; max-width: 600px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
-            <label for="csvFileInput" style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">Importa dati da CSV/TSV (Uso Avanzato):</label>
-            <input type="file" id="csvFileInput" accept=".csv, .tsv" style="margin-right: 10px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            <button id="startCsvImportBtn" style="padding: 8px 15px; background-color: #f39c12; color: white; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s ease;">Avvia Importazione</button>
-            <p id="csvImportStatus" style="margin-top: 10px; color: #555; font-size: 0.9em;"></p>
-
-            <button id="clearAllGamesBtn" style="padding: 8px 15px; background-color: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; transition: background-color 0.3s ease;">Elimina TUTTI i Giochi</button>
-            <p style="font-size: 0.8em; color: #888; margin-top: 5px;">Attenzione: questa azione non può essere annullata!</p>
-        </div>
         <div id="gameList" class="game-cards-container">
         </div>
-    </main>
+
+        <div class="utility-section"> <div class="import-export-section">
+                <label for="csvFileInput">Importa dati da CSV/TSV (Uso Avanzato):</label>
+                <input type="file" id="csvFileInput" accept=".csv, .tsv">
+                <button id="startCsvImportBtn">Avvia Importazione</button>
+                <p id="csvImportStatus"></p>
+            </div>
+
+            <div class="clear-data-section">
+                <button id="clearAllGamesBtn">Elimina TUTTI i Giochi</button>
+                <p style="font-size: 0.8em; color: #888; margin-top: 5px;">Attenzione: questa azione non può essere annullata!</p>
+            </div>
+        </div>
+        </main>
 
     <button id="scrollToTopBtn" title="Torna su">
         <i class="fas fa-arrow-up"></i>
@@ -152,12 +156,10 @@
     </div>
 
     <script type="module">
-      // Import the functions you need from the SDKs you need
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
       import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
       import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-      // Your web app's Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyCshCsTiJDrubw7J92B_sNAJPflH7wAGt8",
         authDomain: "fef-vg-tracker.firebaseapp.com",
@@ -167,18 +169,16 @@
         appId: "1:195759327554:web:c74ef2ab8c8684489b20db"
       };
 
-      // Initialize Firebase
       const app = initializeApp(firebaseConfig);
       const dbFirestore = getFirestore(app);
       const auth = getAuth(app);
 
-      // Rendi le istanze di Firebase disponibili globalmente (o passale alle funzioni)
       window.firestore_db = dbFirestore;
       window.auth = auth;
       window.GoogleAuthProvider = GoogleAuthProvider;
       window.onAuthStateChanged = onAuthStateChanged;
-      window.signInWithPopup = signInWithPopup; // NUOVA RIGA AGGIUNTA
-      window.signOut = signOut; // NUOVA RIGA AGGIUNTA
+      window.signInWithPopup = signInWithPopup;
+      window.signOut = signOut;
     </script>
     <script src="script.js" type="module"></script>
 </body>
