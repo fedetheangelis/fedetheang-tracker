@@ -20,6 +20,7 @@ const gameForm = document.getElementById('gameForm');
 const searchRawgBtn = document.getElementById('searchRawgBtn');
 const rawgSearchResults = document.getElementById('rawgSearchResults');
 const previewCover = document.getElementById('previewCover');
+const deleteGameInModalBtn = document.getElementById('deleteGameInModalBtn');
 
 // Campi del form
 const formGameId = document.getElementById('formGameId');
@@ -221,6 +222,7 @@ function displayGames(gamesToDisplay) {
                     ${game.Costo ? ` | <i class="fas fa-euro-sign"></i> ${game.Costo}` : ''}
                 </span>
             </div>
+        `;
             <button class="delete-game-btn">Elimina</button>
         `;
         gameListDiv.appendChild(gameCard);
@@ -309,9 +311,15 @@ function openModal(game = null) {
         formPrimaVoltaGiocato.value = game.PrimaVoltaGiocato || '';
         formUltimaVoltaFinito.value = game.UltimaVoltaFinito || '';
 
+// Se si sta modificando un gioco esistente, mostra il pulsante Elimina e imposta il suo data-id
+        deleteGameInModalBtn.style.display = 'block';
+        deleteGameInModalBtn.dataset.id = game.id;
+
     } else {
         formGameId.value = '';
         formStatus.value = 'In Corso';
+        deleteGameInModalBtn.style.display = 'none'; // Nascondi il pulsante Elimina per un nuovo gioco
+        deleteGameInModalBtn.dataset.id = ''; // Pulisci il data-id
     }
     gameModal.style.display = 'block';
 }
@@ -663,6 +671,13 @@ window.addEventListener('click', (event) => {
 });
 searchRawgBtn.addEventListener('click', searchRawgGame);
 gameForm.addEventListener('submit', saveGame);
+
+deleteGameInModalBtn.addEventListener('click', () => {
+    const gameIdToDelete = deleteGameInModalBtn.dataset.id;
+    if (gameIdToDelete && confirm('Sei sicuro di voler eliminare questo gioco?')) {
+        deleteGame(gameIdToDelete);
+        closeModal(); // Chiudi il modale dopo l'eliminazione
+    }
 
 if (startCsvImportBtn) {
     startCsvImportBtn.addEventListener('click', importGamesFromCsvOrTsv);
