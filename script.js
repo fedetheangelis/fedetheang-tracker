@@ -5,7 +5,8 @@ const RAWG_API_URL = 'https://api.rawg.io/api/games';
 // IMPORTAZIONI FIREBASE FIRESTORE AGGIORNATE PER SDK MODULARE
 // Queste importazioni sono necessarie in script.js perché è un modulo separato
 // e deve accedere direttamente alle funzioni Firestore del modular SDK.
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+// AGGIUNTA: writeBatch
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
 // Elementi DOM
@@ -328,7 +329,7 @@ function openModal(game = null) {
         formOreDiGioco.value = game.OreDiGioco || '';
         formAnno.value = game.Anno || '';
         formGenere.value = game.Genere || '';
-        formCosto.value = game.Costo || '';
+        formCosto.value = game.Costo ? parseFloat(formCosto.value) : ''; // Assicurati che sia un numero o stringa vuota
         formRecensione.value = game.Recensione || '';
         formVotoDifficolta.value = game.VotoDifficolta || '';
         formPercentualeTrofei.value = game.PercentualeTrofei || '';
@@ -542,8 +543,8 @@ async function importGamesFromCsvOrTsv() {
             if (!gamesCollectionRef) throw new Error("Utente non autenticato per l'importazione.");
 
             let importedCount = 0;
-            // Usiamo un batch per importazioni massicce per efficienza e meno scritture
-            const batch = window.firestore_db.batch(); // Accesso diretto a Firestore dal contesto globale
+            // MODIFICATO: Usa writeBatch(db)
+            const batch = writeBatch(window.firestore_db);
 
             for (const sheetGame of sheetGames) {
                 let platforms = [];
@@ -572,14 +573,6 @@ async function importGamesFromCsvOrTsv() {
                 };
 
                 if (gameData.Titolo) {
-                    // Per il batch, si usa un riferimento al documento ottenuto da collection.doc() dell'SDK v8,
-                    // che funziona ancora in un contesto misto per il batch.
-                    // Tuttavia, per coerenza con l'SDK v9+, dovremmo usare doc() importato.
-                    // Assumendo che 'batch' sia un'istanza di WriteBatch, `batch.set` accetta un DocumentReference.
-                    // Quindi, la creazione del DocumentReference dovrebbe essere modulare.
-                    
-                    // Importante: getGamesCollectionRef() ora restituisce un riferimento modulare.
-                    // Usiamo 'doc' per creare un DocumentReference per il batch.
                     const newDocRef = doc(gamesCollectionRef); // Crea un riferimento a un nuovo documento con ID automatico
                     batch.set(newDocRef, gameData); // Aggiungi l'operazione al batch
                     importedCount++;
@@ -632,7 +625,8 @@ async function clearAllGames() {
         if (!gamesCollectionRef) throw new Error("Utente non autenticato.");
 
         const querySnapshot = await getDocs(gamesCollectionRef); // Usa getDocs con il riferimento alla collezione
-        const batch = window.firestore_db.batch();
+        // MODIFICATO: Usa writeBatch(db)
+        const batch = writeBatch(window.firestore_db);
         querySnapshot.docs.forEach((d) => { // 'd' è un QueryDocumentSnapshot, usa d.ref
             batch.delete(d.ref); // d.ref è già un DocumentReference, funziona con batch.delete
         });
