@@ -5,6 +5,7 @@ const gameListDiv = document.getElementById('gameList');
 const searchInput = document.getElementById('searchInput');
 const statusFilter = document.getElementById('statusFilter');
 const platformFilter = document.getElementById('platformFilter');
+const scrollToTopBtn = document.getElementById('scrollToTopBtn'); // Nuovo elemento
 
 let allGames = []; // Array per memorizzare tutti i giochi caricati
 
@@ -17,7 +18,7 @@ async function fetchGames() {
         }
         allGames = await response.json();
         // Filtra giochi senza titolo o con dati incompleti, se necessario
-        allGames = allGames.filter(game => game.Titolo); // Assicurati che ogni gioco abbia un Titolo
+        allGames = allGames.filter(game => game.Titolo); 
         displayGames(allGames);
         populateFilters(allGames);
     } catch (error) {
@@ -27,7 +28,7 @@ async function fetchGames() {
 }
 
 function displayGames(gamesToDisplay) {
-    gameListDiv.innerHTML = ''; // Pulisce la lista attuale
+    gameListDiv.innerHTML = ''; 
 
     if (gamesToDisplay.length === 0) {
         gameListDiv.innerHTML = '<p class="loading">Nessun gioco trovato con i filtri attuali.</p>';
@@ -38,34 +39,52 @@ function displayGames(gamesToDisplay) {
         const gameCard = document.createElement('div');
         gameCard.classList.add('game-card');
         
-        // Aggiungi una classe per lo stato (es. status-Finito, status-Attivo)
-        // Rimuove spazi e caratteri speciali dai nomi degli stati per renderli validi per le classi CSS
+        // Per la classe dello stato (es. status-Finito)
         if (game.Stato) {
             const statusClass = game.Stato.replace(/[^a-zA-Z0-9]/g, ''); 
             gameCard.classList.add(`status-${statusClass}`);
         }
 
-        // Usa game.Cover per l'URL della copertina
-        // Usa game.Titolo per il titolo del gioco
-        // Usa game.Piattaforma per la piattaforma
+        // Determina il colore delle stelle in base al voto
+        const starsColor = game.Voto >= 90 ? 'gold' : 
+                           game.Voto >= 70 ? 'silver' : 
+                           game.Voto >= 50 ? 'bronze' : 'gray'; // Personalizza i colori delle stelle
+
         gameCard.innerHTML = `
-            <img src="${game.Cover || 'placeholder.png'}" alt="${game.Titolo || 'No Image'}">
-            <h2>${game.Titolo || 'Nome Sconosciuto'}</h2>
-            <p>Piattaforma: ${game.Piattaforma || 'N/D'}</p>
-            <p class="status">Stato: ${game.Stato || 'N/D'}</p>
-            ${game.Voto ? `<p>Voto: ${game.Voto}</p>` : ''}
-            ${game['Ora di gioco'] ? `<p>Ore: ${game['Ora di gioco']}</p>` : ''}
-            ${game.Recensione ? `<p>Recensione: ${game.Recensione}</p>` : ''}
-            ${game['% trofei'] ? `<p>Trofei: ${game['% trofei']}</p>` : ''}
-            ${game['Platino/Completato'] ? `<p>Platino/Completato: ${game['Platino/Completato']}</p>` : ''}
-            ${game['Prima volta finito'] ? `<p>Finito il: ${game['Prima volta finito']}</p>` : ''}
-            ${game['Ultima volta finito'] ? `<p>Ultimo: ${game['Ultima volta finito']}</p>` : ''}
-            ${game.Backlog ? `<p>Backlog: ${game.Backlog}</p>` : ''}
-            ${game.Rank ? `<p>Rank: ${game.Rank}</p>` : ''}
-            ${game.Costo ? `<p>Costo: ${game.Costo}</p>` : ''}
-            ${game.Anno ? `<p>Anno: ${game.Anno}</p>` : ''}
-            ${game.Genere ? `<p>Genere: ${game.Genere}</p>` : ''}
-            `;
+            <div class="header-info">
+                <h2>${game.Titolo || 'Nome Sconosciuto'}</h2>
+                <span class="status-badge">${game.Stato || 'N/D'}</span>
+            </div>
+            <div class="platform-info">
+                <span><i class="fas fa-desktop"></i> ${game.Piattaforma || 'N/D'}</span>
+                ${game.Digitale === true ? ' | <i class="fas fa-download"></i> Digitale' : ''}
+            </div>
+            <img src="${game.Cover || '/fedetheang-tracker/placeholder.png'}" alt="${game.Titolo || 'No Image'}">
+
+            <div class="stats-row">
+                ${game.Voto ? `<div class="stat-item"><span class="stat-icon" style="color: ${starsColor};"><i class="fas fa-star"></i></span> ${game.Voto}</div>` : ''}
+                ${game['Voto Totale'] ? `<div class="stat-item"><span class="stat-icon"><i class="fas fa-chart-line"></i></span> ${game['Voto Totale']}</div>` : ''}
+                ${game['Voto Ambientazione'] ? `<div class="stat-item"><span class="stat-icon"><i class="fas fa-tree"></i></span> ${game['Voto Ambientazione']}</div>` : ''}
+                ${game['Voto Difficoltà'] ? `<div class="stat-item"><span class="stat-icon"><i class="fas fa-dumbbell"></i></span> ${game['Voto Difficoltà']}</div>` : ''}
+                ${game['Ora di gioco'] ? `<div class="stat-item"><span class="stat-icon"><i class="fas fa-hourglass-half"></i></span> ~${game['Ora di gioco']}h</div>` : ''}
+            </div>
+
+            ${game.Recensione ? `<p class="description">${game.Recensione}</p>` : ''}
+            
+            <div class="footer-info">
+                <span>
+                    ${game.Anno ? `<i class="fas fa-calendar-alt"></i> ~${game.Anno}` : ''}
+                    ${game.Genere ? ` | <i class="fas fa-gamepad"></i> ${game.Genere}` : ''}
+                    ${game.Costo ? ` | <i class="fas fa-euro-sign"></i> ${game.Costo}` : ''}
+                </span>
+                <span class="footer-icons">
+                    ${game['% trofei'] ? `<span title="Percentuale Trofei"><i class="fas fa-trophy"></i> ${game['% trofei']}</span>` : ''}
+                    ${game['Platino/Completato'] ? `<span title="Platino/Completato"><i class="fas fa-check-circle"></i></span>` : ''}
+                    ${game.Backlog ? `<span title="Nel Backlog"><i class="fas fa-book"></i></span>` : ''}
+                    ${game.Rank ? `<span title="Rank"><i class="fas fa-medal"></i> ${game.Rank}</span>` : ''}
+                </span>
+            </div>
+        `;
         gameListDiv.appendChild(gameCard);
     });
 }
@@ -94,7 +113,6 @@ function populateFilters(games) {
     });
 
     platformFilter.innerHTML = '<option value="">Tutte le Piattaforme</option>'; // Reset
-    // Ordina le piattaforme alfabeticamente
     Array.from(platforms).sort().forEach(platform => {
         const option = document.createElement('option');
         option.value = platform;
@@ -110,13 +128,30 @@ statusFilter.addEventListener('change', applyFilters);
 platformFilter.addEventListener('change', applyFilters);
 
 
+// Scroll to Top Button logic
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 200) { // Mostra il bottone dopo 200px di scroll
+        scrollToTopBtn.style.display = 'flex';
+    } else {
+        scrollToTopBtn.style.display = 'none';
+    }
+});
+
+scrollToTopBtn.addEventListener('click', () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth' // Animazione di scorrimento
+    });
+});
+
+
 // Carica i giochi all'avvio
 fetchGames();
 
 // Registra il Service Worker per le funzionalità PWA (offline, installazione)
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
+        navigator.serviceWorker.register('/fedetheang-tracker/service-worker.js')
             .then(registration => {
                 console.log('Service Worker registrato con successo:', registration);
             })
