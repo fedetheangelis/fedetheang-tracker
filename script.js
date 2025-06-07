@@ -181,8 +181,8 @@ function displayGames(gamesToDisplay) {
 
         gameCard.innerHTML = `
             <div class="header-info">
-                <h2><span class="math-inline">\{game\.Titolo \|\| 'Nome Sconosciuto'\}</h2\>
-<span class\="status\-badge"\></span>{game.Stato || 'N/D'}</span>
+                <h2>${game.Titolo || 'Nome Sconosciuto'}</h2>
+                <span class="status-badge">${game.Stato || 'N/D'}</span>
             </div>
             <div class="platform-info">
                 <span><i class="fas fa-desktop"></i> ${platformsText}</span>
@@ -193,7 +193,7 @@ function displayGames(gamesToDisplay) {
                 ${game.VotoOST ? ` 🎶 ${game.VotoOST}` : ''}
                 ${game.OreDiGioco ? ` ⏳ ${game.OreDiGioco}` : ''}
             </div>
-            <img src="<span class="math-inline">\{game\.Cover \|\| '\./placeholder\.png'\}" alt\="</span>{game.Titolo || 'No Image'}">
+            <img src="${game.Cover || './placeholder.png'}" alt="${game.Titolo || 'No Image'}">
 
             <div class="stats-row">
                 ${game.VotoTotale ? `<div class="stat-item"><span class="stat-icon" style="color: ${starsColor};"><i class="fas fa-star"></i></span> ${game.VotoTotale}</div>` : ''}
@@ -346,7 +346,7 @@ async function searchRawgGame() {
     rawgSearchResults.innerHTML = '<p>Ricerca...</p>';
 
     try {
-        const response = await fetch(`<span class="math-inline">\{RAWG\_API\_URL\}?search\=</span>{encodeURIComponent(title)}&key=${RAWG_API_KEY}`);
+        const response = await fetch(`${RAWG_API_URL}?search=${encodeURIComponent(title)}&key=${RAWG_API_KEY}`);
         if (!response.ok) {
             throw new Error(`Errore RAWG API: ${response.status}`);
         }
@@ -358,8 +358,8 @@ async function searchRawgGame() {
                 const item = document.createElement('div');
                 item.classList.add('rawg-result-item');
                 item.innerHTML = `
-                    <img src="<span class="math-inline">\{game\.background\_image \|\| '\./placeholder\.png'\}" alt\="</span>{game.name}">
-                    <span><span class="math-inline">\{game\.name\} \(</span>{game.released ? game.released.substring(0,4) : 'N/D'})</span>
+                    <img src="${game.background_image || './placeholder.png'}" alt="${game.name}">
+                    <span>${game.name} (${game.released ? game.released.substring(0,4) : 'N/D'})</span>
                 `;
                 item.addEventListener('click', () => {
                     previewCover.src = game.background_image || './placeholder.png';
@@ -600,4 +600,122 @@ async function importGamesFromCsvOrTsv() {
 // --- Funzione per Eliminare Tutti i Giochi (adattata per Firebase) ---
 async function clearAllGames() {
     if (!currentUser) {
-        alert("Devi
+        alert("Devi essere loggato per eliminare tutti i giochi.");
+        return;
+    }
+
+    if (!confirm("SEI SICURO DI VOLER ELIMINARE TUTTI I GIOCHI DAL TUO TRACKER DI FIREBASE?\nQuesta azione è irreversibile e non può essere annullata!")) {
+        return;
+    }
+
+    try {
+        const gamesCollection = getGamesCollectionRef();
+        if (!gamesCollection) throw new Error("Utente non autenticato.");
+
+        const querySnapshot = await gamesCollection.get();
+        const batch = window.firestore_db.batch();
+        querySnapshot.docs.forEach((doc) => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+
+        console.log('Tutti i giochi sono stati eliminati da Firebase.');
+        alert('Tutti i giochi sono stati eliminati con successo!');
+        loadGames();
+    } catch (error) {
+        console.error('Errore durante l\'eliminazione di tutti i giochi da Firebase:', error);
+        alert('Errore durante l\'eliminazione di tutti i giochi. Controlla la console per i dettagli.');
+    }
+}
+
+// --- Gestione Autenticazione Firebase ---
+
+// Funzione per il login con Google
+async function signInWithGoogle() {
+    const provider = new window.GoogleAuthProvider();
+    try {
+        await window.signInWithPopup(window.auth, provider); // MODIFICATA: chiamata corretta per modular SDK
+    } catch (error) {
+        console.error("Errore di accesso con Google:", error);
+        alert("Errore durante l'accesso con Google: " + error.message);
+    }
+}
+
+// Funzione per il logout
+async function signOutUser() {
+    try {
+        await window.signOut(window.auth); // MODIFICATA: chiamata corretta per modular SDK
+    } catch (error) {
+        console.error("Errore durante il logout:", error);
+        alert("Errore durante il logout: " + error.message);
+    }
+}
+
+// Listener per lo stato di autenticazione
+window.onAuthStateChanged(window.auth, (user) => {
+    currentUser = user;
+    if (user) {
+        userStatus.textContent = `Loggato come: ${user.displayName || user.email}`;
+        authButton.textContent = "Esci";
+        authButton.onclick = signOutUser;
+    } else {
+        userStatus.textContent = "Non loggato";
+        authButton.textContent = "Accedi con Google";
+        authButton.onclick = signInWithGoogle;
+    }
+    loadGames(); // Ricarica i giochi ogni volta che lo stato di autenticazione cambia
+});
+
+
+// --- Event Listeners ---
+searchInput.addEventListener('input', applyFilters);
+statusFilter.addEventListener('change', applyFilters);
+platformFilter.addEventListener('change', applyFilters);
+addGameBtn.addEventListener('click', () => openModal());
+closeButton.addEventListener('click', closeModal);
+window.addEventListener('click', (event) => {
+    if (event.target == gameModal) {
+        closeModal();
+    }
+});
+searchRawgBtn.addEventListener('click', searchRawgGame);
+gameForm.addEventListener('submit', saveGame);
+
+if (startCsvImportBtn) {
+    startCsvImportBtn.addEventListener('click', importGamesFromCsvOrTsv);
+}
+
+if (clearAllGamesBtn) {
+    clearAllGamesBtn.addEventListener('click', clearAllGames);
+}
+
+// Scroll to Top Button logic
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 200) {
+        scrollToTopBtn.style.display = 'flex';
+    } else {
+        scrollToTopBtn.style.display = 'none';
+    }
+});
+scrollToTopBtn.addEventListener('click', () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+});
+
+// NON CHIAMARE loadGames() QUI! Viene chiamato dall'onAuthStateChanged.
+// loadGames(); 
+
+// Registra il Service Worker per le funzionalità PWA (offline, installazione)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/fedetheang-tracker/service-worker.js') 
+            .then(registration => {
+                console.log('Service Worker registrato con successo:', registration);
+            })
+            .catch(error => {
+                console.error('Registrazione Service Worker fallita:', error);
+            });
+    });
+}
