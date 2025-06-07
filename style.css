@@ -1,14 +1,15 @@
+/* Stili esistenti */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f0f2f5; /* Sfondo più chiaro e moderno */
+    background-color: #f0f2f5;
     color: #333;
     line-height: 1.6;
 }
 
 header {
-    background-color: #2c3e50; /* Blu scuro per l'header */
+    background-color: #2c3e50;
     color: white;
     padding: 1.2rem;
     text-align: center;
@@ -20,16 +21,14 @@ header h1 {
     font-size: 1.8rem;
 }
 
-/* Stile per la data di aggiornamento nell'header */
 header h1 .header-update-info {
-    font-size: 0.7em; /* Più piccolo rispetto al titolo principale */
-    color: #b0b0b0; /* Un colore grigio più chiaro per contrasto */
-    margin-left: 15px; /* Spazio dal titolo */
-    font-weight: normal; /* Non in grassetto */
-    white-space: nowrap; /* Evita che vada a capo */
-    display: inline-block; /* Per posizionamento migliore */
+    font-size: 0.7em;
+    color: #b0b0b0;
+    margin-left: 15px;
+    font-weight: normal;
+    white-space: nowrap;
+    display: inline-block;
 }
-
 
 .filters {
     margin-top: 15px;
@@ -49,27 +48,27 @@ header h1 .header-update-info {
 }
 
 main {
-    padding: 25px 20px; /* Più padding generale */
+    padding: 25px 20px;
     display: grid;
-    /* Grid reattiva: minmax(280px, 1fr) per card più larghe */
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px; /* Spazio maggiore tra le card */
+    gap: 30px;
 }
 
 .game-card {
     background-color: white;
-    border-radius: 12px; /* Bordi più arrotondati */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Ombra più pronunciata */
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     overflow: hidden;
-    display: flex; /* Utilizza flexbox per la disposizione interna */
+    display: flex;
     flex-direction: column;
-    padding: 15px; /* Padding interno */
-    transition: transform 0.2s ease-in-out; /* Effetto hover */
-    position: relative; /* Per il pulsante "up" */
+    padding: 15px;
+    transition: transform 0.2s ease-in-out;
+    position: relative;
+    cursor: pointer; /* Indica che la card è cliccabile */
 }
 
 .game-card:hover {
-    transform: translateY(-5px); /* Leggero sollevamento all'hover */
+    transform: translateY(-5px);
 }
 
 .game-card .header-info {
@@ -83,8 +82,8 @@ main {
     font-size: 1.4rem;
     margin: 0;
     color: #333;
-    flex-grow: 1; /* Permette al titolo di prendere spazio */
-    text-align: left; /* Allinea a sinistra */
+    flex-grow: 1;
+    text-align: left;
 }
 
 .game-card .status-badge {
@@ -94,27 +93,39 @@ main {
     border-radius: 5px;
     font-size: 0.85rem;
     font-weight: bold;
-    white-space: nowrap; /* Evita che lo stato vada a capo */
+    white-space: nowrap;
 }
 
 .game-card .platform-info {
     font-size: 0.9rem;
     color: #666;
     margin-bottom: 10px;
-    text-align: left; /* Allinea a sinistra */
+    text-align: left;
 }
 
-.game-card .rating-stars {
-    color: #f39c12; /* Colore oro per le stelle */
-    font-size: 1.2rem;
-    margin-left: 5px;
+.game-card .card-stats-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 1rem;
+    color: #444;
+    gap: 15px;
+    padding-left: 5px;
+}
+
+.game-card .card-stats-header .no-stats-info {
+    font-style: italic;
+    color: #999;
+    font-size: 0.9rem;
 }
 
 .game-card img {
     width: 100%;
-    height: 200px; /* Altezza fissa per le copertine */
+    height: 200px;
     object-fit: cover;
-    border-radius: 8px; /* Bordi arrotondati anche per l'immagine */
+    border-radius: 8px;
     margin-bottom: 15px;
 }
 
@@ -126,7 +137,7 @@ main {
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 15px;
-    flex-wrap: wrap; /* Per adattarsi su schermi piccoli */
+    flex-wrap: wrap;
 }
 
 .game-card .stat-item {
@@ -135,12 +146,12 @@ main {
     gap: 5px;
     font-size: 0.9rem;
     color: #555;
-    margin: 5px; /* Spazio tra gli elementi stat */
+    margin: 5px;
 }
 
 .game-card .stat-icon {
     font-size: 1.1rem;
-    color: #7f8c8d; /* Colore grigio per le icone delle statistiche */
+    color: #7f8c8d;
 }
 
 .game-card .description {
@@ -156,19 +167,18 @@ main {
     align-items: center;
     font-size: 0.85rem;
     color: #777;
-    margin-top: auto; /* Spinge il footer in basso */
+    margin-top: auto;
 }
 
 .game-card .footer-icons span {
-    margin-left: 8px; /* Spazio tra le icone del footer */
+    margin-left: 8px;
 }
 
-/* Bottone "Scorri in alto" */
 .scroll-to-top {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #28a745; /* Verde vivido */
+    background-color: #28a745;
     color: white;
     border: none;
     border-radius: 50%;
@@ -181,7 +191,7 @@ main {
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     transition: background-color 0.3s ease;
-    z-index: 1000; /* Assicura che sia sopra gli altri elementi */
+    z-index: 1000;
 }
 
 .scroll-to-top:hover {
@@ -199,23 +209,229 @@ footer {
 
 .loading {
     text-align: center;
-    grid-column: 1 / -1; /* Centra su tutte le colonne */
+    grid-column: 1 / -1;
     padding: 20px;
     font-size: 1.1rem;
     color: #555;
 }
 
 .loading.error {
-    color: #dc3545; /* Colore rosso per gli errori */
+    color: #dc3545;
 }
 
-/* Stile per le immagini placeholder (se non c'è una copertina) */
-.game-card img[src*="placeholder.png"] {
-    background-color: #eee;
+/* --- NUOVI STILI PER IL MODALE E RAWG API --- */
+
+/* Stile per il bottone Aggiungi Gioco */
+.add-game-button {
+    position: fixed;
+    bottom: 80px; /* Sopra il bottone "torna su" */
+    right: 20px;
+    background-color: #007bff; /* Blu */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease;
+    z-index: 999;
+}
+
+.add-game-button:hover {
+    background-color: #0056b3;
+}
+
+/* Stile del Modale (popup) */
+.modal {
+    display: none; /* Nascosto di default */
+    position: fixed; /* Posizionamento fisso rispetto alla viewport */
+    z-index: 1001; /* Sopra tutto il resto */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Abilita lo scroll se il contenuto è troppo grande */
+    background-color: rgba(0,0,0,0.6); /* Sfondo semi-trasparente scuro */
+    padding-top: 60px; /* Spazio dall'alto per centrare il modale */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; /* 5% dall'alto e centrato orizzontalmente */
+    padding: 30px;
+    border: 1px solid #888;
+    border-radius: 10px;
+    width: 90%; /* Larghezza del contenuto del modale */
+    max-width: 700px; /* Larghezza massima */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.modal-content h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Stile per il form all'interno del modale */
+#gameForm {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Spazio tra gli elementi del form */
+}
+
+#gameForm label {
+    font-weight: bold;
+    color: #555;
+    margin-top: 5px;
+}
+
+#gameForm input[type="text"],
+#gameForm input[type="number"],
+#gameForm textarea,
+#gameForm select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: calc(100% - 22px); /* Adatta larghezza al padding */
+    box-sizing: border-box; /* Include padding e bordo nella larghezza */
+}
+
+#gameForm textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+#gameForm button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+#gameForm button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+/* Stili per la ricerca RAWG */
+#gameForm #searchRawgBtn {
+    background-color: #6c757d; /* Grigio */
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-top: 5px;
+    align-self: flex-start; /* Allinea a sinistra */
+}
+
+#gameForm #searchRawgBtn:hover {
+    background-color: #5a6268;
+}
+
+.rawg-results {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-top: 10px;
+    padding: 5px;
+    background-color: #f9f9f9;
+}
+
+.rawg-result-item {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    color: #666;
-    text-align: center;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.rawg-result-item:last-child {
+    border-bottom: none;
+}
+
+.rawg-result-item:hover {
+    background-color: #e9e9e9;
+}
+
+.rawg-result-item img {
+    width: 60px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 3px;
+    margin-right: 10px;
+}
+
+.rawg-result-item span {
+    font-weight: bold;
+    color: #333;
+}
+
+.preview-cover {
+    width: 100%;
+    max-height: 250px;
+    object-fit: contain; /* Contiene l'immagine senza tagliarla */
+    border-radius: 8px;
+    margin: 15px 0;
+    background-color: #e0e0e0; /* Sfondo per immagini trasparenti */
+}
+
+/* Stili per le checkbox inline */
+#gameForm input[type="checkbox"] {
+    margin-right: 8px;
+}
+#gameForm label[for="formPlatinoCompletato"],
+#gameForm label[for="formDigitale"],
+#gameForm label[for="formBacklog"] {
+    display: inline-block;
+    width: auto;
+    margin-right: 20px;
+    font-weight: normal; /* Non in grassetto come le altre label */
+}
+
+/* Media Queries per reattività */
+@media (max-width: 600px) {
+    .modal-content {
+        margin: 10% auto;
+        padding: 20px;
+    }
+    .filters {
+        flex-direction: column;
+        align-items: center;
+    }
+    .filters input, .filters select {
+        width: 90%;
+    }
 }
