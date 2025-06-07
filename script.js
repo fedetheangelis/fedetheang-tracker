@@ -10,7 +10,7 @@ import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, writeBatch } fr
 const gameListDiv = document.getElementById('gameList');
 const searchInput = document.getElementById('searchInput');
 const statusFilter = document.getElementById('statusFilter');
-// Rimosso: const platformFilter = document.getElementById('platformFilter');
+// Rimosso: const platformFilter = document.getElementById('platformFilter'); <-- Rimosso definitivamente
 const scrollToTopBtn = document.getElementById('scrollToTopBtn');
 const siteTitleElement = document.getElementById('siteTitle');
 const addGameBtn = document.getElementById('addGameBtn');
@@ -26,7 +26,7 @@ const formGameId = document.getElementById('formGameId');
 const formTitle = document.getElementById('formTitle');
 const formCover = document.getElementById('formCover');
 const formStatus = document.getElementById('formStatus');
-const formPlatform = document.getElementById('formPlatform');
+const formPlatform = document.getElementById('formPlatform'); // Questo rimane per il form di aggiunta/modifica
 const formVotoTotale = document.getElementById('formVotoTotale');
 const formVotoAesthetic = document.getElementById('formVotoAesthetic');
 const formVotoOST = document.getElementById('formVotoOST');
@@ -250,20 +250,13 @@ function applyFilters() {
         const matchesStatus = selectedStatus ? game.Stato === selectedStatus : true;
         
         // Rimosso il controllo del filtro per piattaforma
-        // const matchesPlatform = selectedPlatform ? 
-        //     (Array.isArray(game.Piattaforma) ? 
-        //         game.Piattaforma.some(p => p.toLowerCase().includes(selectedPlatform.toLowerCase())) :
-        //         (typeof game.Piattaforma === 'string' && game.Piattaforma.toLowerCase().includes(selectedPlatform.toLowerCase()))
-        //     ) : true;
-        
-        // return matchesSearch && matchesStatus && matchesPlatform;
         return matchesSearch && matchesStatus; // Modificato per non considerare il filtro piattaforma
     });
 
     displayGames(filteredGames);
 }
 
-// Rimosso: function populateFilters(games) { ... }
+// Rimosso: function populateFilters(games) { ... } <-- Rimosso definitivamente
 
 // --- Funzioni Modale Form ---
 
@@ -367,7 +360,8 @@ async function searchRawgGame() {
             rawgSearchResults.innerHTML = '<p>Nessun risultato trovato su RAWG.</p>';
         }
 
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Errore ricerca RAWG:", error);
         rawgSearchResults.innerHTML = `<p class="error">Errore nella ricerca RAWG: ${error.message}</p>`;
     }
@@ -659,7 +653,7 @@ window.onAuthStateChanged(window.auth, (user) => {
 // --- Event Listeners ---
 searchInput.addEventListener('input', applyFilters);
 statusFilter.addEventListener('change', applyFilters);
-// Rimosso: platformFilter.addEventListener('change', applyFilters);
+// Rimosso: platformFilter.addEventListener('change', applyFilters); <-- Rimosso definitivamente
 addGameBtn.addEventListener('click', () => openModal());
 closeButton.addEventListener('click', closeModal);
 window.addEventListener('click', (event) => {
