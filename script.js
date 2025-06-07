@@ -47,6 +47,9 @@ const startCsvImportBtn = document.getElementById('startCsvImportBtn');
 const csvImportStatus = document.getElementById('csvImportStatus');
 // const updateCoversBtn = document.getElementById('updateCoversBtn'); // Commentato: non più necessario con l'approccio attuale
 
+// NUOVO ELEMENTO DOM: Pulsante per eliminare tutti i giochi
+const clearAllGamesBtn = document.getElementById('clearAllGamesBtn');
+
 
 let allGames = []; // Array per memorizzare tutti i giochi caricati
 let db; // Variabile per il database IndexedDB
@@ -451,7 +454,7 @@ async function importGamesFromCsvOrTsv() {
             return;
         }
 
-        // Mappa gli header, assicurandoti che siano puliti da spazi extra
+        // Mappa gli header, assicurandosi che siano puliti da spazi extra
         const headers = lines[0].split(delimiter).map(h => h.trim());
         const sheetGames = [];
 
@@ -564,6 +567,35 @@ async function importGamesFromCsvOrTsv() {
     reader.readAsText(file);
 }
 
+// --- Nuova Funzione per Eliminare Tutti i Giochi ---
+async function clearAllGames() {
+    if (!confirm("SEI SICURO DI VOLER ELIMINARE TUTTI I GIOCHI DAL TUO TRACKER?\nQuesta azione è irreversibile e non può essere annullata!")) {
+        return;
+    }
+
+    try {
+        await openDatabase(); // Assicurati che IndexedDB sia aperto
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.clear(); // Il metodo clear() elimina tutti gli oggetti dallo store
+
+        request.onsuccess = () => {
+            console.log('Tutti i giochi sono stati eliminati da IndexedDB.');
+            alert('Tutti i giochi sono stati eliminati con successo!');
+            loadGames(); // Ricarica la lista dei giochi (che ora sarà vuota)
+        };
+
+        request.onerror = (event) => {
+            console.error('Errore durante l\'eliminazione di tutti i giochi:', event.target.error);
+            alert('Errore durante l\'eliminazione di tutti i giochi. Controlla la console per i dettagli.');
+        };
+    } catch (error) {
+        console.error("Errore nell'apertura del database per l'eliminazione:", error);
+        alert("Errore nell'apertura del database per l'eliminazione.");
+    }
+}
+
+
 // --- Event Listeners ---
 searchInput.addEventListener('input', applyFilters);
 statusFilter.addEventListener('change', applyFilters);
@@ -582,12 +614,12 @@ gameForm.addEventListener('submit', saveGame);
 if (startCsvImportBtn) { // Controlla se il bottone esiste nel DOM
     startCsvImportBtn.addEventListener('click', importGamesFromCsvOrTsv);
 }
-// Event listener per il bottone di aggiornamento cover (commentato, riattiva se lo aggiungi in HTML)
-/*
-if (updateCoversBtn) {
-    updateCoversBtn.addEventListener('click', updateCoversFromCsvOrTsv); // Assicurati che updateCoversFromCsvOrTsv sia definita
+
+// NUOVO EVENT LISTENER: Eliminazione di tutti i giochi
+if (clearAllGamesBtn) {
+    clearAllGamesBtn.addEventListener('click', clearAllGames);
 }
-*/
+
 
 // Scroll to Top Button logic
 window.addEventListener('scroll', () => {
