@@ -3,9 +3,6 @@ const RAWG_API_KEY = 'b06700683ebe479fa895f1db55b1abb8'; // LA TUA CHIAVE API RA
 const RAWG_API_URL = 'https://api.rawg.io/api/games';
 
 // IMPORTAZIONI FIREBASE FIRESTORE AGGIORNATE PER SDK MODULARE
-// Queste importazioni sono necessarie in script.js perché è un modulo separato
-// e deve accedere direttamente alle funzioni Firestore del modular SDK.
-// AGGIUNTA: writeBatch
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -13,7 +10,7 @@ import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, writeBatch } fr
 const gameListDiv = document.getElementById('gameList');
 const searchInput = document.getElementById('searchInput');
 const statusFilter = document.getElementById('statusFilter');
-const platformFilter = document.getElementById('platformFilter');
+// Rimosso: const platformFilter = document.getElementById('platformFilter');
 const scrollToTopBtn = document.getElementById('scrollToTopBtn');
 const siteTitleElement = document.getElementById('siteTitle');
 const addGameBtn = document.getElementById('addGameBtn');
@@ -70,51 +67,39 @@ function formatAppUpdateDate(dateString) {
 // --- FINE Data di aggiornamento dell'app ---
 
 // --- Funzioni Firebase (sostituiscono IndexedDB) ---
-// Le istanze di Firebase sono rese disponibili globalmente dal blocco script type="module" in index.html
-// window.firestore_db, window.auth, window.GoogleAuthProvider, window.signInWithPopup, window.signOut
-
-// MODIFICATA: Ora usa la funzione 'collection' importata direttamente
 function getGamesCollectionRef() {
     if (!currentUser) {
-        // Se non c'è un utente loggato, non possiamo accedere a una collezione personalizzata per l'utente.
-        // Questo sarà gestito da loadGames() che mostra un messaggio di login.
         return null;
     }
-    // La collezione sarà users/{userId}/games
-    // Questo segue le regole di sicurezza che abbiamo impostato in Firestore.
     return collection(window.firestore_db, `users/${currentUser.uid}/games`);
 }
 
-// MODIFICATA: Ora usa la funzione 'addDoc' importata direttamente
 async function addGameToFirestore(game) {
     const gamesCollectionRef = getGamesCollectionRef();
     if (!gamesCollectionRef) throw new Error("Utente non autenticato. Impossibile aggiungere gioco.");
     const docRef = await addDoc(gamesCollectionRef, game);
-    return { id: docRef.id, ...game }; // Aggiungi l'ID generato da Firestore
+    return { id: docRef.id, ...game };
 }
 
-// MODIFICATA: Ora usa la funzione 'doc' e 'updateDoc' importate direttamente
 async function updateGameInFirestore(game) {
     const gamesCollectionRef = getGamesCollectionRef();
     if (!gamesCollectionRef) throw new Error("Utente non autenticato. Impossibile aggiornare gioco.");
-    const gameDocRef = doc(gamesCollectionRef, game.id); // Ottieni il riferimento al documento
+    const gameDocRef = doc(gamesCollectionRef, game.id);
     await updateDoc(gameDocRef, game);
     return game;
 }
 
-// MODIFICATA: Ora usa la funzione 'getDocs' importata direttamente
 async function getAllGamesFromFirestore() {
     const gamesCollectionRef = getGamesCollectionRef();
-    if (!gamesCollectionRef) return []; // Ritorna array vuoto se non loggato
-    const querySnapshot = await getDocs(gamesCollectionRef); // Usa getDocs con il riferimento alla collezione
+    if (!gamesCollectionRef) return [];
+    const querySnapshot = await getDocs(gamesCollectionRef);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-// MODIFICATA: Ora usa la funzione 'doc' e 'deleteDoc' importate direttamente
 async function deleteGameFromFirestore(id) {
     const gamesCollectionRef = getGamesCollectionRef();
     if (!gamesCollectionRef) throw new Error("Utente non autenticato. Impossibile eliminare gioco.");
-    const gameDocRef = doc(gamesCollectionRef, id); // Ottieni il riferimento al documento
+    const gameDocRef = doc(gamesCollectionRef, id);
     await deleteDoc(gameDocRef);
 }
 
@@ -132,13 +117,21 @@ async function loadGames() {
     if (currentUser) {
         try {
             allGames = await getAllGamesFromFirestore();
+            // Ordina i giochi per titolo A-Z di default
+            allGames.sort((a, b) => {
+                const titleA = (a.Titolo || '').toLowerCase();
+                const titleB = (b.Titolo || '').toLowerCase();
+                if (titleA < titleB) return -1;
+                if (titleA > titleB) return 1;
+                return 0;
+            });
             displayGames(allGames);
-            populateFilters(allGames);
+            // Rimosso: populateFilters(allGames);
             // Abilita i bottoni se utente loggato
             addGameBtn.style.display = 'inline-block';
             startCsvImportBtn.style.display = 'inline-block';
-            csvFileInput.style.display = 'inline-block'; // Mostra anche l'input file
-            csvImportStatus.style.display = 'block'; // Mostra anche lo status
+            csvFileInput.style.display = 'inline-block';
+            csvImportStatus.style.display = 'block';
             clearAllGamesBtn.style.display = 'inline-block';
         } catch (error) {
             console.error("Errore nel caricamento dei giochi da Firestore:", error);
@@ -151,9 +144,9 @@ async function loadGames() {
             clearAllGamesBtn.style.display = 'none';
         }
     } else {
-        allGames = []; // Nessun gioco da mostrare se non loggato
+        allGames = [];
         displayGames([]);
-        populateFilters([]); // Pulisci i filtri
+        // Rimosso: populateFilters([]); // Pulisci i filtri
         gameListDiv.innerHTML = '<p class="loading">Effettua l\'accesso con Google per visualizzare e gestire i tuoi giochi.</p>';
         // Disabilita i bottoni se non loggato
         addGameBtn.style.display = 'none';
@@ -176,7 +169,7 @@ function displayGames(gamesToDisplay) {
     gamesToDisplay.forEach(game => {
         const gameCard = document.createElement('div');
         gameCard.classList.add('game-card');
-        gameCard.dataset.id = game.id; // Salva l'ID del gioco (Firestore doc ID)
+        gameCard.dataset.id = game.id;
 
         if (game.Stato) {
             const statusClass = game.Stato.replace(/[^a-zA-Z0-9]/g, '');
@@ -250,42 +243,27 @@ function displayGames(gamesToDisplay) {
 function applyFilters() {
     const searchText = searchInput.value.toLowerCase();
     const selectedStatus = statusFilter.value;
-    const selectedPlatform = platformFilter.value;
+    // Rimosso: const selectedPlatform = platformFilter.value; // Non più necessario
 
     const filteredGames = allGames.filter(game => {
         const matchesSearch = game.Titolo ? game.Titolo.toLowerCase().includes(searchText) : false;
         const matchesStatus = selectedStatus ? game.Stato === selectedStatus : true;
         
-        const matchesPlatform = selectedPlatform ? 
-            (Array.isArray(game.Piattaforma) ? 
-                game.Piattaforma.some(p => p.toLowerCase().includes(selectedPlatform.toLowerCase())) :
-                (typeof game.Piattaforma === 'string' && game.Piattaforma.toLowerCase().includes(selectedPlatform.toLowerCase()))
-            ) : true;
+        // Rimosso il controllo del filtro per piattaforma
+        // const matchesPlatform = selectedPlatform ? 
+        //     (Array.isArray(game.Piattaforma) ? 
+        //         game.Piattaforma.some(p => p.toLowerCase().includes(selectedPlatform.toLowerCase())) :
+        //         (typeof game.Piattaforma === 'string' && game.Piattaforma.toLowerCase().includes(selectedPlatform.toLowerCase()))
+        //     ) : true;
         
-        return matchesSearch && matchesStatus && matchesPlatform;
+        // return matchesSearch && matchesStatus && matchesPlatform;
+        return matchesSearch && matchesStatus; // Modificato per non considerare il filtro piattaforma
     });
 
     displayGames(filteredGames);
 }
 
-function populateFilters(games) {
-    const platforms = new Set();
-    games.forEach(game => {
-        if (Array.isArray(game.Piattaforma)) {
-            game.Piattaforma.forEach(p => platforms.add(p));
-        } else if (typeof game.Piattaforma === 'string' && game.Piattaforma) {
-            platforms.add(game.Piattaforma);
-        }
-    });
-
-    platformFilter.innerHTML = '<option value="">Tutte le Piattaforme</option>';
-    Array.from(platforms).sort().forEach(platform => {
-        const option = document.createElement('option');
-        option.value = platform;
-        option.textContent = platform;
-        platformFilter.appendChild(option);
-    });
-}
+// Rimosso: function populateFilters(games) { ... }
 
 // --- Funzioni Modale Form ---
 
@@ -304,7 +282,7 @@ function openModal(game = null) {
     });
 
     if (game) {
-        formGameId.value = game.id; // Firestore ID
+        formGameId.value = game.id;
         formTitle.value = game.Titolo || '';
         formCover.value = game.Cover || '';
         previewCover.src = game.Cover || './placeholder.png';
@@ -329,7 +307,7 @@ function openModal(game = null) {
         formOreDiGioco.value = game.OreDiGioco || '';
         formAnno.value = game.Anno || '';
         formGenere.value = game.Genere || '';
-        formCosto.value = game.Costo ? parseFloat(formCosto.value) : ''; // Assicurati che sia un numero o stringa vuota
+        formCosto.value = game.Costo ? parseFloat(game.Costo) : '';
         formRecensione.value = game.Recensione || '';
         formVotoDifficolta.value = game.VotoDifficolta || '';
         formPercentualeTrofei.value = game.PercentualeTrofei || '';
@@ -413,7 +391,7 @@ async function saveGame(event) {
         VotoTotale: formVotoTotale.value ? parseInt(formVotoTotale.value) : null,
         VotoAesthetic: formVotoAesthetic.value ? parseInt(formVotoAesthetic.value) : null,
         VotoOST: formVotoOST.value ? parseInt(formVotoOST.value) : null,
-        OreDiGioco: formOreDiGioco.value.trim(), // Testo
+        OreDiGioco: formOreDiGioco.value.trim(),
         Anno: formAnno.value ? parseInt(formAnno.value) : null,
         Genere: formGenere.value.trim(),
         Costo: formCosto.value ? parseFloat(formCosto.value) : null,
@@ -421,9 +399,9 @@ async function saveGame(event) {
         VotoDifficolta: formVotoDifficolta.value ? parseInt(formVotoDifficolta.value) : null,
         PercentualeTrofei: formPercentualeTrofei.value ? parseInt(formPercentualeTrofei.value) : null,
         
-        ReplayCompletati: formReplayCompletati.value ? parseInt(formReplayCompletati.value) : null, // Numerico
-        PrimaVoltaGiocato: formPrimaVoltaGiocato.value.trim(), // Testo
-        UltimaVoltaFinito: formUltimaVoltaFinito.value.trim(), // Testo
+        ReplayCompletati: formReplayCompletati.value ? parseInt(formReplayCompletati.value) : null,
+        PrimaVoltaGiocato: formPrimaVoltaGiocato.value.trim(),
+        UltimaVoltaFinito: formUltimaVoltaFinito.value.trim(),
     };
 
     if (!gameData.Titolo) {
@@ -432,16 +410,16 @@ async function saveGame(event) {
     }
 
     try {
-        if (formGameId.value) { // Se esiste un ID, è un aggiornamento
-            gameData.id = formGameId.value; // Aggiungi l'ID per l'update Firestore
+        if (formGameId.value) {
+            gameData.id = formGameId.value;
             await updateGameInFirestore(gameData);
             console.log('Gioco aggiornato su Firestore:', gameData);
-        } else { // Altrimenti, è un nuovo gioco
+        } else {
             const newGame = await addGameToFirestore(gameData);
             console.log('Gioco aggiunto a Firestore:', newGame);
         }
         closeModal();
-        loadGames(); // Ricarica e visualizza i giochi
+        loadGames();
     } catch (error) {
         console.error("Errore nel salvataggio del gioco su Firestore:", error);
         alert("Errore nel salvataggio del gioco. Controlla la console per dettagli e assicurati di essere loggato.");
@@ -467,7 +445,7 @@ async function deleteGame(gameId) {
     try {
         await deleteGameFromFirestore(gameId);
         console.log(`Gioco con ID ${gameId} eliminato da Firestore.`);
-        loadGames(); // Ricarica i giochi dopo l'eliminazione
+        loadGames();
     } catch (error) {
         console.error("Errore nell'eliminazione del gioco da Firestore:", error);
         alert("Errore nell'eliminazione del gioco. Controlla la console per dettagli.");
@@ -539,11 +517,10 @@ async function importGamesFromCsvOrTsv() {
         csvImportStatus.textContent = `Analizzati ${sheetGames.length} giochi. Salvataggio in corso su Firebase...`;
 
         try {
-            const gamesCollectionRef = getGamesCollectionRef(); // Ottieni il riferimento alla collezione modulare
+            const gamesCollectionRef = getGamesCollectionRef();
             if (!gamesCollectionRef) throw new Error("Utente non autenticato per l'importazione.");
 
             let importedCount = 0;
-            // MODIFICATO: Usa writeBatch(db)
             const batch = writeBatch(window.firestore_db);
 
             for (const sheetGame of sheetGames) {
@@ -557,29 +534,29 @@ async function importGamesFromCsvOrTsv() {
                     Cover: sheetGame['Link copertina:'] || '', 
                     Stato: sheetGame.Stato || 'In Corso',
                     Piattaforma: platforms.length > 0 ? platforms : null,
-                    OreDiGioco: sheetGame['Ore di gioco'] || '', // Testo
+                    OreDiGioco: sheetGame['Ore di gioco'] || '',
                     VotoTotale: sheetGame['Voto Totale'] ? parseInt(sheetGame['Voto Totale']) : null,
                     VotoAesthetic: sheetGame['Voto Aesthetic'] ? parseInt(sheetGame['Voto Aesthetic']) : null,
                     VotoOST: sheetGame['Voto OST'] ? parseInt(sheetGame['Voto OST']) : null,
                     VotoDifficolta: sheetGame['Difficoltà'] ? parseInt(sheetGame['Difficoltà']) : null, 
                     Recensione: sheetGame.Recensione || '',
                     PercentualeTrofei: sheetGame['% Trofei'] ? parseInt(sheetGame['% Trofei']) : null,
-                    ReplayCompletati: sheetGame['Replay completati'] ? parseInt(sheetGame['Replay completati']) : null, // Numerico
-                    PrimaVoltaGiocato: sheetGame['Prima volta giocato'] || '', // Testo
-                    UltimaVoltaFinito: sheetGame['Ultima volta finito'] || '', // Testo
+                    ReplayCompletati: sheetGame['Replay completati'] ? parseInt(sheetGame['Replay completati']) : null,
+                    PrimaVoltaGiocato: sheetGame['Prima volta giocato'] || '',
+                    UltimaVoltaFinito: sheetGame['Ultima volta finito'] || '',
                     Anno: sheetGame.Anno ? parseInt(sheetGame.Anno) : null,
                     Genere: sheetGame.Genere || '',
                     Costo: sheetGame.Costo ? parseFloat(sheetGame.Costo) : null,
                 };
 
                 if (gameData.Titolo) {
-                    const newDocRef = doc(gamesCollectionRef); // Crea un riferimento a un nuovo documento con ID automatico
-                    batch.set(newDocRef, gameData); // Aggiungi l'operazione al batch
+                    const newDocRef = doc(gamesCollectionRef);
+                    batch.set(newDocRef, gameData);
                     importedCount++;
                 }
             }
 
-            await batch.commit(); // Esegui tutte le operazioni in batch
+            await batch.commit();
             
             csvImportStatus.textContent = `Importazione completata! ${importedCount} giochi aggiunti a Firebase.`;
             alert(`Importazione completata! ${importedCount} giochi aggiunti.`);
@@ -621,14 +598,13 @@ async function clearAllGames() {
     }
 
     try {
-        const gamesCollectionRef = getGamesCollectionRef(); // Ottieni il riferimento alla collezione modulare
+        const gamesCollectionRef = getGamesCollectionRef();
         if (!gamesCollectionRef) throw new Error("Utente non autenticato.");
 
-        const querySnapshot = await getDocs(gamesCollectionRef); // Usa getDocs con il riferimento alla collezione
-        // MODIFICATO: Usa writeBatch(db)
+        const querySnapshot = await getDocs(gamesCollectionRef);
         const batch = writeBatch(window.firestore_db);
-        querySnapshot.docs.forEach((d) => { // 'd' è un QueryDocumentSnapshot, usa d.ref
-            batch.delete(d.ref); // d.ref è già un DocumentReference, funziona con batch.delete
+        querySnapshot.docs.forEach((d) => {
+            batch.delete(d.ref);
         });
         await batch.commit();
 
@@ -676,14 +652,14 @@ window.onAuthStateChanged(window.auth, (user) => {
         authButton.textContent = "Accedi con Google";
         authButton.onclick = signInWithGoogle;
     }
-    loadGames(); // Ricarica i giochi ogni volta che lo stato di autenticazione cambia
+    loadGames();
 });
 
 
 // --- Event Listeners ---
 searchInput.addEventListener('input', applyFilters);
 statusFilter.addEventListener('change', applyFilters);
-platformFilter.addEventListener('change', applyFilters);
+// Rimosso: platformFilter.addEventListener('change', applyFilters);
 addGameBtn.addEventListener('click', () => openModal());
 closeButton.addEventListener('click', closeModal);
 window.addEventListener('click', (event) => {
@@ -716,9 +692,6 @@ scrollToTopBtn.addEventListener('click', () => {
         behavior: 'smooth'
     });
 });
-
-// NON CHIAMARE loadGames() QUI! Viene chiamato dall'onAuthStateChanged.
-// loadGames(); 
 
 // Registra il Service Worker per le funzionalità PWA (offline, installazione)
 if ('serviceWorker' in navigator) {
