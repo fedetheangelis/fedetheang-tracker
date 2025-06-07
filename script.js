@@ -223,7 +223,9 @@ function displayGames(gamesToDisplay) {
         gameListDiv.appendChild(gameCard);
 
         gameCard.addEventListener('click', (event) => {
-            // Non c'è più il bottone elimina separato, quindi qualsiasi click apre la modifica
+            // Evita che il click si propaghi ad elementi figli se ce ne fossero di interattivi
+            // Anche se per ora l'intera card è il target, è buona pratica.
+            event.stopPropagation(); 
             editGame(game.id);
         });
     });
