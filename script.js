@@ -1,5 +1,5 @@
 // *** SOSTITUISCI QUESTO URL CON QUELLO CHE HAI OTTENUTO DA APPS SCRIPT ***
-const appsScriptWebAppUrl = 'https://script.google.com/macros/s/AKfycbxpjAET6mjwVDrEXyyFcrHqcKzwD156cNQSSd5dJ-ugS2C2ra3N63YXmYuCL172_r9y/exec';
+const appsScriptWebAppUrl = 'https://script.google.com/macros/s/AKfycbxpjAET6mjwVDrEXyyFcrHqcKzwD156cNQSSd5dJ-ugS2C2ra3N63YXmYuCL172_r9y/exec'; // Verifica che sia ancora l'URL corretto dal tuo deployment
 
 const gameListDiv = document.getElementById('gameList');
 const searchInput = document.getElementById('searchInput');
@@ -14,8 +14,7 @@ let allGames = []; // Array per memorizzare tutti i giochi caricati
 // Questa stringa rappresenta la data e ora dell'ultimo aggiornamento del codice dell'app.
 // Ogni volta che carichi nuove modifiche a `script.js` (o ad altri file chiave) su GitHub,
 // AGGIORNA MANUALMENTE questa stringa con la data e ora correnti.
-// Data e ora attuali: 7 giugno 2025, 13:03
-const appLastUpdated = "07/06/2025 13:03"; // AGGIORNA QUESTA DATA OGNI VOLTA CHE FAI UN CAMBIO SIGNIFICATIVO
+const appLastUpdated = "07/06/2025 13:06"; // AGGIORNA QUESTA DATA OGNI VOLTA CHE FAI UN CAMBIO SIGNIFICATIVO
 
 // Funzione per formattare la data (opzionale, se vuoi un formato diverso)
 function formatAppUpdateDate(dateString) {
@@ -32,7 +31,7 @@ async function fetchGames() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         allGames = await response.json();
-        allGames = allGames.filter(game => game.Titolo);
+        allGames = allGames.filter(game => game.Titolo); // Assicura che ci sia un titolo
 
         // Aggiorna il titolo del sito con la data di aggiornamento dell'app
         if (appLastUpdated) {
@@ -70,7 +69,7 @@ function displayGames(gamesToDisplay) {
                            game.Voto >= 70 ? 'silver' :
                            game.Voto >= 50 ? 'bronze' : 'gray';
 
-        // --- NOMI COLONNA AGGIORNATI PER CORRISPONDERE AL TUO FOGLIO ---
+        // --- NOMI COLONNA AGGIORNATI PER CORRISPONDERE AL TUO FOGLIO (Voto Aesthetic, Ore di gioco) ---
         const gameHeaderContent = `
             ${game['Voto Totale'] ? `⭐ ${game['Voto Totale']}` : ''}
             ${game['Voto Aesthetic'] ? ` 🌌 ${game['Voto Aesthetic']}` : ''} ${game['Voto OST'] ? ` 🎶 ${game['Voto OST']}` : ''}
