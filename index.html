@@ -154,8 +154,6 @@
     <script type="module">
       // Import the functions you need from the SDKs you need
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-      // Ho aggiornato la versione a 10.12.2, se Firebase ti ha dato la 11.9.0, puoi cambiarla qui
-      // ma per ora usiamo quella che abbiamo testato.
       import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
       import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -175,11 +173,10 @@
       const auth = getAuth(app);
 
       // Rendi le istanze di Firebase disponibili globalmente (o passale alle funzioni)
-      // Questo è un modo semplice per un'app client-side, ma non il più pulito
-      window.firestore_db = dbFirestore; // Ho corretto qui: in script.js si usa 'firestore_db'
+      window.firestore_db = dbFirestore;
       window.auth = auth;
       window.GoogleAuthProvider = GoogleAuthProvider;
-      window.onAuthStateChanged = onAuthStateChanged; // Per monitorare lo stato di autenticazione
+      window.onAuthStateChanged = onAuthStateChanged;
 
     </script>
     <script src="script.js"></script>
