@@ -45,6 +45,7 @@ const formRank = document.getElementById('formRank');
 const csvFileInput = document.getElementById('csvFileInput');
 const startCsvImportBtn = document.getElementById('startCsvImportBtn');
 const csvImportStatus = document.getElementById('csvImportStatus');
+// const updateCoversBtn = document.getElementById('updateCoversBtn'); // Commentato: non più necessario con l'approccio attuale
 
 
 let allGames = []; // Array per memorizzare tutti i giochi caricati
@@ -52,7 +53,7 @@ let db; // Variabile per il database IndexedDB
 
 // --- Data di aggiornamento dell'app ---
 // AGGIORNA QUESTA DATA OGNI VOLTA CHE FAI UN CAMBIO SIGNIFICATIVO AL CODICE FRONTEND
-const appLastUpdated = "07/06/2025 13:28"; 
+const appLastUpdated = "07/06/2025 14:00"; 
 
 function formatAppUpdateDate(dateString) {
     return dateString;
@@ -288,7 +289,8 @@ function openModal(game = null) {
         formRecensione.value = game.Recensione || '';
         formVotoDifficolta.value = game.VotoDifficolta || '';
         formPercentualeTrofei.value = game.PercentualeTrofei || '';
-        formPlatinoCompletato.checked = game.PlatinoCompletato || false;
+        // Utilizza il campo corretto per il checkbox
+        formPlatinoCompletato.checked = game.PlatinoCompletato || false; 
         formDigitale.checked = game.Digitale || false;
         formBacklog.checked = game.Backlog || false;
         formRank.value = game.Rank || '';
@@ -417,7 +419,7 @@ async function deleteGame(gameId) {
     }
 }
 
-// --- Nuova Funzione di Importazione da CSV/TSV ---
+// --- Funzione di Importazione da CSV/TSV ---
 async function importGamesFromCsvOrTsv() {
     const file = csvFileInput.files[0];
     if (!file) {
@@ -449,6 +451,7 @@ async function importGamesFromCsvOrTsv() {
             return;
         }
 
+        // Mappa gli header, assicurandoti che siano puliti da spazi extra
         const headers = lines[0].split(delimiter).map(h => h.trim());
         const sheetGames = [];
 
@@ -483,28 +486,33 @@ async function importGamesFromCsvOrTsv() {
             let importedCount = 0;
 
             for (const sheetGame of sheetGames) {
-                // Mappa i nomi delle colonne dal file ai nomi usati nel tuo script
-                // Assicurati che i nomi delle proprietà corrispondano a quelli usati nella funzione saveGame e openModal
                 const gameData = {
                     // id: verrà auto-incrementato da IndexedDB
-                    Titolo: sheetGame.Titolo || '', // Assicurati che 'Titolo' sia il nome della colonna
-                    Cover: sheetGame.Cover || '', 
+                    Titolo: sheetGame.Titolo || '',
+                    Cover: sheetGame['Link copertina:'] || '', // <-- Ora usa il nome esatto della colonna!
                     Stato: sheetGame.Stato || 'Backlog',
                     Piattaforma: sheetGame.Piattaforma || '',
+                    OreDiGioco: sheetGame['Ore di gioco'] ? parseInt(sheetGame['Ore di gioco']) : null,
                     VotoTotale: sheetGame['Voto Totale'] ? parseInt(sheetGame['Voto Totale']) : null,
                     VotoAesthetic: sheetGame['Voto Aesthetic'] ? parseInt(sheetGame['Voto Aesthetic']) : null,
                     VotoOST: sheetGame['Voto OST'] ? parseInt(sheetGame['Voto OST']) : null,
-                    OreDiGioco: sheetGame['Ore di gioco'] ? parseInt(sheetGame['Ore di gioco']) : null,
+                    VotoDifficolta: sheetGame['Difficoltà'] ? parseInt(sheetGame['Difficoltà']) : null, // Mappa 'Difficoltà' come numerico
+                    Recensione: sheetGame.Recensione || '',
+                    PercentualeTrofei: sheetGame['% Trofei'] ? parseInt(sheetGame['% Trofei']) : null,
+                    // 'Platino/Masterato in' come plain text
+                    PlatinoMasteratoIn: sheetGame['Platino/Masterato in'] || '', 
+                    // 'Prima volta giocato' e 'Ultima volta finito' come plain text
+                    PrimaVoltaGiocato: sheetGame['Prima volta giocato'] || '',
+                    UltimaVoltaFinito: sheetGame['Ultima volta finito'] || '',
+                    
+                    // Altri campi, se presenti nel tuo TSV e desideri mappali
                     Anno: sheetGame.Anno ? parseInt(sheetGame.Anno) : null,
                     Genere: sheetGame.Genere || '',
                     Costo: sheetGame.Costo ? parseFloat(sheetGame.Costo) : null,
-                    Recensione: sheetGame.Recensione || '',
-                    VotoDifficolta: sheetGame['Voto Difficoltà'] ? parseInt(sheetGame['Voto Difficoltà']) : null,
-                    PercentualeTrofei: sheetGame['% Trofei'] ? parseInt(sheetGame['% Trofei']) : null,
-                    PlatinoCompletato: sheetGame['Platino/Completato'] === true || sheetGame['Platino/Completato'] === 'TRUE' || sheetGame['Platino/Completato'] === '1', // Gestisci booleani
-                    Digitale: sheetGame.Digitale === true || sheetGame.Digitale === 'TRUE' || sheetGame.Digitale === '1',
-                    Backlog: sheetGame.Backlog === true || sheetGame.Backlog === 'TRUE' || sheetGame.Backlog === '1',
-                    Rank: sheetGame.Rank ? parseInt(sheetGame.Rank) : null
+                    Digitale: sheetGame.Digitale === true || sheetGame.Digitale === 'TRUE' || sheetGame.Digitale === '1', // Assumi se hai una colonna 'Digitale'
+                    Backlog: sheetGame.Backlog === true || sheetGame.Backlog === 'TRUE' || sheetGame.Backlog === '1', // Assumi se hai una colonna 'Backlog'
+                    Rank: sheetGame.Rank ? parseInt(sheetGame.Rank) : null, // Assumi se hai una colonna 'Rank'
+                    ReplayCompletati: sheetGame['Replay completati'] ? parseInt(sheetGame['Replay completati']) : null, // Mappa Replay completati come numerico
                 };
 
                 // Aggiungi solo se ha un titolo valido
@@ -515,12 +523,10 @@ async function importGamesFromCsvOrTsv() {
                     };
                     request.onerror = (e) => {
                         console.warn(`Errore aggiungendo "${gameData.Titolo}":`, e.target.error.name);
-                        // Potrebbe essere un ConstraintError se hai impostato un indice unico per il titolo, ad esempio
                     };
                 }
             }
 
-            // Attendere il completamento della transazione
             await new Promise((resolve, reject) => {
                 transaction.oncomplete = () => {
                     resolve();
@@ -529,11 +535,11 @@ async function importGamesFromCsvOrTsv() {
                     reject(event.target.error);
                 };
             });
-            
+
             csvImportStatus.textContent = `Importazione completata! ${importedCount} giochi aggiunti a IndexedDB.`;
             alert(`Importazione completata! ${importedCount} giochi aggiunti.`);
             loadGames(); // Ricarica e visualizza i giochi
-            
+
             // Rimuovi gli elementi di importazione dopo il successo
             csvFileInput.style.display = 'none';
             startCsvImportBtn.style.display = 'none';
@@ -558,7 +564,6 @@ async function importGamesFromCsvOrTsv() {
     reader.readAsText(file);
 }
 
-
 // --- Event Listeners ---
 searchInput.addEventListener('input', applyFilters);
 statusFilter.addEventListener('change', applyFilters);
@@ -577,7 +582,12 @@ gameForm.addEventListener('submit', saveGame);
 if (startCsvImportBtn) { // Controlla se il bottone esiste nel DOM
     startCsvImportBtn.addEventListener('click', importGamesFromCsvOrTsv);
 }
-
+// Event listener per il bottone di aggiornamento cover (commentato, riattiva se lo aggiungi in HTML)
+/*
+if (updateCoversBtn) {
+    updateCoversBtn.addEventListener('click', updateCoversFromCsvOrTsv); // Assicurati che updateCoversFromCsvOrTsv sia definita
+}
+*/
 
 // Scroll to Top Button logic
 window.addEventListener('scroll', () => {
