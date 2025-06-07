@@ -20,6 +20,17 @@ header h1 {
     font-size: 1.8rem;
 }
 
+/* Stile per la data di aggiornamento nell'header */
+header h1 .header-update-info {
+    font-size: 0.7em; /* Più piccolo rispetto al titolo principale */
+    color: #b0b0b0; /* Un colore grigio più chiaro per contrasto */
+    margin-left: 15px; /* Spazio dal titolo */
+    font-weight: normal; /* Non in grassetto */
+    white-space: nowrap; /* Evita che vada a capo */
+    display: inline-block; /* Per posizionamento migliore */
+}
+
+
 .filters {
     margin-top: 15px;
     display: flex;
@@ -66,14 +77,6 @@ main {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
-}
-
-.game-card .header-info h2 .last-update-info {
-    font-size: 0.8rem; /* Rendi il testo leggermente più piccolo del titolo */
-    color: #777; /* Un colore più tenue */
-    margin-left: 10px; /* Spazio dal titolo */
-    font-weight: normal; /* Non in grassetto */
-    white-space: nowrap; /* Evita che vada a capo */
 }
 
 .game-card h2 {
