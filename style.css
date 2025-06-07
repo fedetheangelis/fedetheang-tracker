@@ -68,6 +68,14 @@ main {
     margin-bottom: 10px;
 }
 
+.game-card .header-info h2 .last-update-info {
+    font-size: 0.8rem; /* Rendi il testo leggermente più piccolo del titolo */
+    color: #777; /* Un colore più tenue */
+    margin-left: 10px; /* Spazio dal titolo */
+    font-weight: normal; /* Non in grassetto */
+    white-space: nowrap; /* Evita che vada a capo */
+}
+
 .game-card h2 {
     font-size: 1.4rem;
     margin: 0;
