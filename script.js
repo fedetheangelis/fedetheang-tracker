@@ -1,5 +1,5 @@
-// *** SOSTITUISCI QUESTO URL CON QUELLO CHE HAI OTTENUTO DA APPS SCRIPT ***
-const appsScriptWebAppUrl = 'https://script.google.com/macros/s/AKfycbxpjAET6mjwVDrEXyyFcrHqcKzwD156cNQSSd5dJ-ugS2C2ra3N63YXmYuCL172_r9y/exec'; // Verifica che sia ancora l'URL corretto dal tuo deployment
+// *** SOSTITUISCI QUESTO URL CON IL NUOVO URL CHE HAI APPENA OTTENUTO DAL NUOVO APPS SCRIPT DEPLOYMENT ***
+const appsScriptWebAppUrl = 'https://script.google.com/macros/s/AKfycbw_3xM32cbSRzoYs-EVVj_vi1AekRPqAYixGAd-lKBFoPygljdJhkfgdo5e1t18S5aR/exec'; // Verifica che sia ancora l'URL corretto dal tuo deployment
 
 const gameListDiv = document.getElementById('gameList');
 const searchInput = document.getElementById('searchInput');
