@@ -2,6 +2,12 @@
 const RAWG_API_KEY = 'b06700683ebe479fa895f1db55b1abb8'; // LA TUA CHIAVE API RAWG È QUI!
 const RAWG_API_URL = 'https://api.rawg.io/api/games';
 
+// IMPORTAZIONI FIREBASE FIRESTORE AGGIORNATE PER SDK MODULARE
+// Queste importazioni sono necessarie in script.js perché è un modulo separato
+// e deve accedere direttamente alle funzioni Firestore del modular SDK.
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
 // Elementi DOM
 const gameListDiv = document.getElementById('gameList');
 const searchInput = document.getElementById('searchInput');
@@ -64,8 +70,9 @@ function formatAppUpdateDate(dateString) {
 
 // --- Funzioni Firebase (sostituiscono IndexedDB) ---
 // Le istanze di Firebase sono rese disponibili globalmente dal blocco script type="module" in index.html
-// window.dbFirestore, window.auth, window.GoogleAuthProvider, window.signInWithPopup, window.signOut
+// window.firestore_db, window.auth, window.GoogleAuthProvider, window.signInWithPopup, window.signOut
 
+// MODIFICATA: Ora usa la funzione 'collection' importata direttamente
 function getGamesCollectionRef() {
     if (!currentUser) {
         // Se non c'è un utente loggato, non possiamo accedere a una collezione personalizzata per l'utente.
@@ -74,36 +81,40 @@ function getGamesCollectionRef() {
     }
     // La collezione sarà users/{userId}/games
     // Questo segue le regole di sicurezza che abbiamo impostato in Firestore.
-    return window.firestore_db.collection(`users/${currentUser.uid}/games`);
+    return collection(window.firestore_db, `users/${currentUser.uid}/games`);
 }
 
+// MODIFICATA: Ora usa la funzione 'addDoc' importata direttamente
 async function addGameToFirestore(game) {
-    const gamesCollection = getGamesCollectionRef();
-    if (!gamesCollection) throw new Error("Utente non autenticato. Impossibile aggiungere gioco.");
-    const docRef = await gamesCollection.add(game);
+    const gamesCollectionRef = getGamesCollectionRef();
+    if (!gamesCollectionRef) throw new Error("Utente non autenticato. Impossibile aggiungere gioco.");
+    const docRef = await addDoc(gamesCollectionRef, game);
     return { id: docRef.id, ...game }; // Aggiungi l'ID generato da Firestore
 }
 
+// MODIFICATA: Ora usa la funzione 'doc' e 'updateDoc' importate direttamente
 async function updateGameInFirestore(game) {
-    const gamesCollection = getGamesCollectionRef();
-    if (!gamesCollection) throw new Error("Utente non autenticato. Impossibile aggiornare gioco.");
-    const gameDocRef = gamesCollection.doc(game.id);
-    await gameDocRef.update(game);
+    const gamesCollectionRef = getGamesCollectionRef();
+    if (!gamesCollectionRef) throw new Error("Utente non autenticato. Impossibile aggiornare gioco.");
+    const gameDocRef = doc(gamesCollectionRef, game.id); // Ottieni il riferimento al documento
+    await updateDoc(gameDocRef, game);
     return game;
 }
 
+// MODIFICATA: Ora usa la funzione 'getDocs' importata direttamente
 async function getAllGamesFromFirestore() {
-    const gamesCollection = getGamesCollectionRef();
-    if (!gamesCollection) return []; // Ritorna array vuoto se non loggato
-    const querySnapshot = await gamesCollection.get();
+    const gamesCollectionRef = getGamesCollectionRef();
+    if (!gamesCollectionRef) return []; // Ritorna array vuoto se non loggato
+    const querySnapshot = await getDocs(gamesCollectionRef); // Usa getDocs con il riferimento alla collezione
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
+// MODIFICATA: Ora usa la funzione 'doc' e 'deleteDoc' importate direttamente
 async function deleteGameFromFirestore(id) {
-    const gamesCollection = getGamesCollectionRef();
-    if (!gamesCollection) throw new Error("Utente non autenticato. Impossibile eliminare gioco.");
-    const gameDocRef = gamesCollection.doc(id);
-    await gameDocRef.delete();
+    const gamesCollectionRef = getGamesCollectionRef();
+    if (!gamesCollectionRef) throw new Error("Utente non autenticato. Impossibile eliminare gioco.");
+    const gameDocRef = doc(gamesCollectionRef, id); // Ottieni il riferimento al documento
+    await deleteDoc(gameDocRef);
 }
 
 // --- Logica dell'App (adattata per Firebase) ---
@@ -527,8 +538,8 @@ async function importGamesFromCsvOrTsv() {
         csvImportStatus.textContent = `Analizzati ${sheetGames.length} giochi. Salvataggio in corso su Firebase...`;
 
         try {
-            const gamesCollection = getGamesCollectionRef();
-            if (!gamesCollection) throw new Error("Utente non autenticato per l'importazione.");
+            const gamesCollectionRef = getGamesCollectionRef(); // Ottieni il riferimento alla collezione modulare
+            if (!gamesCollectionRef) throw new Error("Utente non autenticato per l'importazione.");
 
             let importedCount = 0;
             // Usiamo un batch per importazioni massicce per efficienza e meno scritture
@@ -561,7 +572,15 @@ async function importGamesFromCsvOrTsv() {
                 };
 
                 if (gameData.Titolo) {
-                    const newDocRef = gamesCollection.doc(); // Crea un riferimento a un nuovo documento con ID automatico
+                    // Per il batch, si usa un riferimento al documento ottenuto da collection.doc() dell'SDK v8,
+                    // che funziona ancora in un contesto misto per il batch.
+                    // Tuttavia, per coerenza con l'SDK v9+, dovremmo usare doc() importato.
+                    // Assumendo che 'batch' sia un'istanza di WriteBatch, `batch.set` accetta un DocumentReference.
+                    // Quindi, la creazione del DocumentReference dovrebbe essere modulare.
+                    
+                    // Importante: getGamesCollectionRef() ora restituisce un riferimento modulare.
+                    // Usiamo 'doc' per creare un DocumentReference per il batch.
+                    const newDocRef = doc(gamesCollectionRef); // Crea un riferimento a un nuovo documento con ID automatico
                     batch.set(newDocRef, gameData); // Aggiungi l'operazione al batch
                     importedCount++;
                 }
@@ -609,13 +628,13 @@ async function clearAllGames() {
     }
 
     try {
-        const gamesCollection = getGamesCollectionRef();
-        if (!gamesCollection) throw new Error("Utente non autenticato.");
+        const gamesCollectionRef = getGamesCollectionRef(); // Ottieni il riferimento alla collezione modulare
+        if (!gamesCollectionRef) throw new Error("Utente non autenticato.");
 
-        const querySnapshot = await gamesCollection.get();
+        const querySnapshot = await getDocs(gamesCollectionRef); // Usa getDocs con il riferimento alla collezione
         const batch = window.firestore_db.batch();
-        querySnapshot.docs.forEach((doc) => {
-            batch.delete(doc.ref);
+        querySnapshot.docs.forEach((d) => { // 'd' è un QueryDocumentSnapshot, usa d.ref
+            batch.delete(d.ref); // d.ref è già un DocumentReference, funziona con batch.delete
         });
         await batch.commit();
 
@@ -634,7 +653,7 @@ async function clearAllGames() {
 async function signInWithGoogle() {
     const provider = new window.GoogleAuthProvider();
     try {
-        await window.signInWithPopup(window.auth, provider); // MODIFICATA: chiamata corretta per modular SDK
+        await window.signInWithPopup(window.auth, provider);
     } catch (error) {
         console.error("Errore di accesso con Google:", error);
         alert("Errore durante l'accesso con Google: " + error.message);
@@ -644,7 +663,7 @@ async function signInWithGoogle() {
 // Funzione per il logout
 async function signOutUser() {
     try {
-        await window.signOut(window.auth); // MODIFICATA: chiamata corretta per modular SDK
+        await window.signOut(window.auth);
     } catch (error) {
         console.error("Errore durante il logout:", error);
         alert("Errore durante il logout: " + error.message);
