@@ -3,182 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker Videogiochi di FeF</title>
+    <title id="siteTitle">Tracker Videogiochi di FeF</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="manifest" href="manifest.json">
+    <script type="module" src="./firebase-config.js"></script>
 </head>
 <body>
     <header>
-        <h1 id="siteTitle">Tracker Videogiochi di FeF</h1>
-        <div class="auth-section">
-            <span id="userStatus">Caricamento...</span>
-            <button id="authButton">Accedi con Google</button>
+        <div class="header-content">
+            <h1 id="siteTitle">Tracker Videogiochi di FeF</h1>
+            <div class="auth-section">
+                <span id="userStatus">Non loggato</span>
+                <button id="authButton" class="btn primary-btn">Login con Google</button>
+            </div>
         </div>
-        <div class="search-and-filters">
-            <input type="text" id="searchInput" placeholder="Cerca per titolo...">
-            <select id="statusFilter">
-                <option value="">Tutti gli Stati</option>
-                <option value="Masterato/Platinato">Masterato/Platinato</option>
-                <option value="Completato (100%)">Completato (100%)</option>
-                <option value="Finito">Finito</option>
+        <div class="controls">
+            <input type="text" id="searchInput" placeholder="Cerca per titolo, genere, piattaforma...">
+            <select id="statusFilter" class="filter-select">
+                <option value="Tutti">Tutti gli Stati</option>
+                <option value="Completato">Completato</option>
                 <option value="In Corso">In Corso</option>
                 <option value="In Pausa">In Pausa</option>
-                <option value="Droppato">Droppato</option>
-                <option value="Online/Senza Fine">Online/Senza Fine</option>
-                <option value="Archiviato">Archiviato</option>
+                <option value="Abbandonato">Abbandonato</option>
+                <option value="Da Iniziare">Da Iniziare</option>
+                <option value="Desiderato">Desiderato</option>
             </select>
-            <button id="addGameBtn" class="add-game-button">Aggiungi Nuovo Gioco</button>
+            <button id="addGameBtn" class="btn primary-btn"><i class="fas fa-plus"></i> Aggiungi Nuovo Gioco</button>
+        </div>
+        <div class="import-export-section">
+            <input type="file" id="csvFileInput" accept=".csv, .tsv" style="display: none;">
+            <button id="startCsvImportBtn" class="btn secondary-btn" style="display: none;"><i class="fas fa-file-import"></i> Importa CSV/TSV</button>
+            <span id="csvImportStatus" style="display: none;"></span>
+            <button id="clearAllGamesBtn" class="btn danger-btn" style="display: none;"><i class="fas fa-trash-alt"></i> Elimina Tutti i Giochi</button>
         </div>
     </header>
 
     <main>
-        <div id="gameList" class="game-cards-container">
-        </div>
-
-        <div class="utility-section">
-            <div class="import-export-section">
-                <label for="csvFileInput">Importa dati da CSV/TSV (Uso Avanzato):</label>
-                <input type="file" id="csvFileInput" accept=".csv, .tsv">
-                <button id="startCsvImportBtn">Avvia Importazione</button>
-                <p id="csvImportStatus"></p>
+        <div id="gameList" class="game-grid">
             </div>
-
-            <div class="clear-data-section">
-                <button id="clearAllGamesBtn">Elimina TUTTI i Giochi</button>
-                <p style="font-size: 0.8em; color: #888; margin-top: 5px;">Attenzione: questa azione non può essere annullata!</p>
-            </div>
-        </div>
     </main>
-
-    <button id="scrollToTopBtn" title="Torna su">
-        <i class="fas fa-arrow-up"></i>
-    </button>
 
     <div id="gameModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <h2>Aggiungi/Modifica Gioco</h2>
+            <h2>Dettagli Gioco</h2>
             <form id="gameForm">
                 <input type="hidden" id="formGameId">
+                
                 <div class="form-group">
                     <label for="formTitle">Titolo:</label>
-                    <input type="text" id="formTitle" required>
-                    <button type="button" id="searchRawgBtn">Cerca Copertina (RAWG)</button>
+                    <input type="text" id="formTitle" required placeholder="Inserisci il titolo del gioco">
+                    <button type="button" id="searchRawgBtn" class="btn secondary-btn"><i class="fas fa-search"></i> Cerca su RAWG</button>
+                    <div id="rawgSearchResults" class="rawg-results"></div>
                 </div>
-                <div id="rawgSearchResults" class="rawg-results"></div>
-                <div class="form-group cover-preview">
-                    <label>Copertina:</label>
-                    <img id="previewCover" src="./placeholder.png" alt="Anteprima Copertina" style="max-width: 150px; display: block; margin-top: 10px;">
-                    <input type="hidden" id="formCover"> </div>
+
+                <div class="form-group">
+                    <label for="formCover">URL Copertina:</label>
+                    <input type="url" id="formCover" placeholder="URL dell'immagine di copertina">
+                    <img id="previewCover" src="./placeholder.png" alt="Anteprima Copertina" style="max-width: 100px; max-height: 100px; margin-top: 10px; display: block;">
+                </div>
 
                 <div class="form-group">
                     <label for="formStatus">Stato:</label>
                     <select id="formStatus">
-                        <option value="Masterato/Platinato">Masterato/Platinato</option>
-                        <option value="Completato (100%)">Completato (100%)</option>
-                        <option value="Finito">Finito</option>
                         <option value="In Corso">In Corso</option>
+                        <option value="Completato">Completato</option>
                         <option value="In Pausa">In Pausa</option>
-                        <option value="Droppato">Droppato</option>
-                        <option value="Online/Senza Fine">Online/Senza Fine</option>
-                        <option value="Archiviato">Archiviato</option>
-                    </select>
+                        <option value="Abbandonato">Abbandonato</option>
+                        <option value="Da Iniziare">Da Iniziare</option>
+                        <option value="Desiderato">Desiderato</option>
+                        </select>
                 </div>
 
                 <div class="form-group">
                     <label for="formPlatform">Piattaforma/e:</label>
-                    <select id="formPlatform" multiple size="5">
+                    <select id="formPlatform" multiple>
+                        <option value="PC">PC</option>
+                        <option value="PlayStation 5">PlayStation 5</option>
+                        <option value="PlayStation 4">PlayStation 4</option>
+                        <option value="Nintendo Switch">Nintendo Switch</option>
+                        <option value="Xbox Series X/S">Xbox Series X/S</option>
+                        <option value="Xbox One">Xbox One</option>
+                        <option value="Mobile">Mobile</option>
                         <option value="PS1">PS1</option>
                         <option value="PS2">PS2</option>
                         <option value="PS3">PS3</option>
-                        <option value="PS4">PS4</option>
-                        <option value="PS5">PS5</option>
-                        <option value="PC">PC</option>
-                        <option value="SWITCH">SWITCH</option>
                         <option value="3DS">3DS</option>
                         <option value="GBA">GBA</option>
                         <option value="WII">WII</option>
                         <option value="DIGITALE">DIGITALE</option>
                         <option value="FISICO">FISICO</option>
+                        <option value="Altro">Altro</option>
                     </select>
-                    <small>Tieni premuto Ctrl (o Cmd su Mac) per selezionare più opzioni.</small>
                 </div>
-                
-                <div class="form-group">
-                    <label for="formOreDiGioco">Ore di Gioco:</label>
-                    <input type="text" id="formOreDiGioco">
-                </div>
+
                 <div class="form-group">
                     <label for="formVotoTotale">Voto Totale (0-100):</label>
-                    <input type="number" id="formVotoTotale" min="0" max="100">
+                    <input type="number" id="formVotoTotale" min="0" max="100" placeholder="0-100">
                 </div>
                 <div class="form-group">
                     <label for="formVotoAesthetic">Voto Aesthetic (0-100):</label>
-                    <input type="number" id="formVotoAesthetic" min="0" max="100">
+                    <input type="number" id="formVotoAesthetic" min="0" max="100" placeholder="0-100">
                 </div>
                 <div class="form-group">
                     <label for="formVotoOST">Voto OST (0-100):</label>
-                    <input type="number" id="formVotoOST" min="0" max="100">
+                    <input type="number" id="formVotoOST" min="0" max="100" placeholder="0-100">
                 </div>
                 <div class="form-group">
-                    <label for="formVotoDifficolta">Difficoltà (1-10):</label>
-                    <input type="number" id="formVotoDifficolta" min="1" max="10">
+                    <label for="formOreDiGioco">Ore di Gioco (Es. 50 ore, 100+ ore):</label>
+                    <input type="text" id="formOreDiGioco" placeholder="Es. 50 ore, 100+ ore">
+                </div>
+                
+                <div class="form-group">
+                    <label for="formAnno">Anno:</label>
+                    <input type="number" id="formAnno" placeholder="Anno di uscita">
+                </div>
+                <div class="form-group">
+                    <label for="formGenere">Genere:</label>
+                    <input type="text" id="formGenere" placeholder="Es. RPG, Azione, Avventura">
+                </div>
+                <div class="form-group">
+                    <label for="formCosto">Costo (€):</label>
+                    <input type="number" id="formCosto" step="0.01" placeholder="Costo in Euro">
+                </div>
+                <div class="form-group">
+                    <label for="formRecensione">Recensione:</label>
+                    <textarea id="formRecensione" rows="4" placeholder="La tua recensione del gioco"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="formVotoDifficolta">Voto Difficoltà (0-100):</label>
+                    <input type="number" id="formVotoDifficolta" min="0" max="100" placeholder="0-100">
                 </div>
                 <div class="form-group">
                     <label for="formPercentualeTrofei">Percentuale Trofei (%):</label>
-                    <input type="number" id="formPercentualeTrofei" min="0" max="100">
+                    <input type="number" id="formPercentualeTrofei" min="0" max="100" placeholder="0-100">
                 </div>
-
+                
                 <div class="form-group">
                     <label for="formReplayCompletati">Replay Completati:</label>
-                    <input type="number" id="formReplayCompletati" min="0">
+                    <input type="number" id="formReplayCompletati" min="0" placeholder="Numero di replay">
                 </div>
                 <div class="form-group">
-                    <label for="formPrimaVoltaGiocato">Prima volta giocato:</label>
-                    <input type="text" id="formPrimaVoltaGiocato">
+                    <label for="formPrimaVoltaGiocato">Prima Volta Giocato (Data):</label>
+                    <input type="text" id="formPrimaVoltaGiocato" placeholder="Es. 01/01/2023">
                 </div>
                 <div class="form-group">
-                    <label for="formUltimaVoltaFinito">Ultima volta finito:</label>
-                    <input type="text" id="formUltimaVoltaFinito">
+                    <label for="formUltimaVoltaFinito">Ultima Volta Finito (Data):</label>
+                    <input type="text" id="formUltimaVoltaFinito" placeholder="Es. 31/12/2023">
                 </div>
 
-                <div class="form-group">
-                    <label for="formRecensione">Recensione:</label>
-                    <textarea id="formRecensione" rows="4"></textarea>
+                <div class="form-actions">
+                    <button type="submit" class="btn primary-btn"><i class="fas fa-save"></i> Salva Gioco</button>
+                    <button type="button" id="deleteGameInModalBtn" class="btn danger-btn" style="display: none;"><i class="fas fa-trash-alt"></i> Elimina Gioco</button>
                 </div>
-
-                <button type="submit">Salva Gioco</button>
             </form>
-            <button id="deleteGameInModalBtn" class="delete-game-button-modal">Elimina Gioco</button>
-            </div>
+        </div>
     </div>
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-      import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-      import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    <button id="scrollToTopBtn" title="Torna su"><i class="fas fa-arrow-up"></i></button>
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyCshCsTiJDrubw7J92B_sNAJPflH7wAGt8",
-        authDomain: "fef-vg-tracker.firebaseapp.com",
-        projectId: "fef-vg-tracker",
-        storageBucket: "fef-vg-tracker.firebasestorage.app",
-        messagingSenderId: "195759327554",
-        appId: "1:195759327554:web:c74ef2ab8c8684489b20db"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const dbFirestore = getFirestore(app);
-      const auth = getAuth(app);
-
-      window.firestore_db = dbFirestore;
-      window.auth = auth;
-      window.GoogleAuthProvider = GoogleAuthProvider;
-      window.onAuthStateChanged = onAuthStateChanged;
-      window.signInWithPopup = signInWithPopup;
-      window.signOut = signOut;
-    </script>
-    <script src="script.js" type="module"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
