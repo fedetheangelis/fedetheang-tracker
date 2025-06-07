@@ -30,7 +30,7 @@
             </select>
             <select id="platformFilter">
                 <option value="">Tutte le Piattaforme</option>
-                </select>
+            </select>
             <button id="addGameBtn" class="add-game-button">Aggiungi Nuovo Gioco</button>
         </div>
     </header>
@@ -46,7 +46,7 @@
             <p style="font-size: 0.8em; color: #888; margin-top: 5px;">Attenzione: questa azione non può essere annullata!</p>
         </div>
         <div id="gameList" class="game-cards-container">
-            </div>
+        </div>
     </main>
 
     <button id="scrollToTopBtn" title="Torna su">
@@ -177,7 +177,8 @@
       window.auth = auth;
       window.GoogleAuthProvider = GoogleAuthProvider;
       window.onAuthStateChanged = onAuthStateChanged;
-
+      window.signInWithPopup = signInWithPopup; // NUOVA RIGA AGGIUNTA
+      window.signOut = signOut; // NUOVA RIGA AGGIUNTA
     </script>
     <script src="script.js" type="module"></script>
 </body>
