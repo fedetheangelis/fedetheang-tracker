@@ -1,39 +1,140 @@
-// *** SOSTITUISCI QUESTO URL CON IL NUOVO URL CHE HAI APPENA OTTENUTO DAL NUOVO APPS SCRIPT DEPLOYMENT ***
-const appsScriptWebAppUrl = 'https://script.google.com/macros/s/AKfycbw_3xM32cbSRzoYs-EVVj_vi1AekRPqAYixGAd-lKBFoPygljdJhkfgdo5e1t18S5aR/exec'; // Verifica che sia ancora l'URL corretto dal tuo deployment
+// Costanti
+const RAWG_API_KEY = 'b06700683ebe479fa895f1db55b1abb8'; // <--- INSERISCI LA TUA CHIAVE API RAWG QUI
+const RAWG_API_URL = 'https://api.rawg.io/api/games';
+const DB_NAME = 'GameTrackerDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'games';
 
+// Elementi DOM
 const gameListDiv = document.getElementById('gameList');
 const searchInput = document.getElementById('searchInput');
 const statusFilter = document.getElementById('statusFilter');
 const platformFilter = document.getElementById('platformFilter');
 const scrollToTopBtn = document.getElementById('scrollToTopBtn');
 const siteTitleElement = document.getElementById('siteTitle');
+const addGameBtn = document.getElementById('addGameBtn');
+const gameModal = document.getElementById('gameModal');
+const closeButton = gameModal.querySelector('.close-button');
+const gameForm = document.getElementById('gameForm');
+const searchRawgBtn = document.getElementById('searchRawgBtn');
+const rawgSearchResults = document.getElementById('rawgSearchResults');
+const previewCover = document.getElementById('previewCover');
+
+// Campi del form
+const formGameId = document.getElementById('formGameId');
+const formTitle = document.getElementById('formTitle');
+const formCover = document.getElementById('formCover'); // Campo nascosto
+const formStatus = document.getElementById('formStatus');
+const formPlatform = document.getElementById('formPlatform');
+const formVotoTotale = document.getElementById('formVotoTotale');
+const formVotoAesthetic = document.getElementById('formVotoAesthetic');
+const formVotoOST = document.getElementById('formVotoOST');
+const formOreDiGioco = document.getElementById('formOreDiGioco');
+const formAnno = document.getElementById('formAnno');
+const formGenere = document.getElementById('formGenere');
+const formCosto = document.getElementById('formCosto');
+const formRecensione = document.getElementById('formRecensione');
+const formVotoDifficolta = document.getElementById('formVotoDifficolta');
+const formPercentualeTrofei = document.getElementById('formPercentualeTrofei');
+const formPlatinoCompletato = document.getElementById('formPlatinoCompletato');
+const formDigitale = document.getElementById('formDigitale');
+const formBacklog = document.getElementById('formBacklog');
+const formRank = document.getElementById('formRank');
+
+// Elementi per l'importazione CSV/TSV
+const csvFileInput = document.getElementById('csvFileInput');
+const startCsvImportBtn = document.getElementById('startCsvImportBtn');
+const csvImportStatus = document.getElementById('csvImportStatus');
+
 
 let allGames = []; // Array per memorizzare tutti i giochi caricati
+let db; // Variabile per il database IndexedDB
 
 // --- Data di aggiornamento dell'app ---
-// Questa stringa rappresenta la data e ora dell'ultimo aggiornamento del codice dell'app.
-// Ogni volta che carichi nuove modifiche a `script.js` (o ad altri file chiave) su GitHub,
-// AGGIORNA MANUALMENTE questa stringa con la data e ora correnti.
-const appLastUpdated = "07/06/2025 13:06"; // AGGIORNA QUESTA DATA OGNI VOLTA CHE FAI UN CAMBIO SIGNIFICATIVO
+// AGGIORNA QUESTA DATA OGNI VOLTA CHE FAI UN CAMBIO SIGNIFICATIVO AL CODICE FRONTEND
+const appLastUpdated = "07/06/2025 13:20"; 
 
-// Funzione per formattare la data (opzionale, se vuoi un formato diverso)
 function formatAppUpdateDate(dateString) {
     return dateString;
 }
 // --- FINE Data di aggiornamento dell'app ---
 
+// --- Funzioni IndexedDB ---
+function openDatabase() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-async function fetchGames() {
+        request.onupgradeneeded = (event) => {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+            }
+        };
+
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            resolve(db);
+        };
+
+        request.onerror = (event) => {
+            console.error('IndexedDB error:', event.target.errorCode);
+            reject(event.target.errorCode);
+        };
+    });
+}
+
+function addGameToDB(game) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.add(game);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function updateGameInDB(game) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.put(game); // put per aggiornare
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function getAllGamesFromDB() {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readonly');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.getAll();
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function deleteGameFromDB(id) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.delete(id);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// --- Logica dell'App ---
+
+async function loadGames() {
     try {
         gameListDiv.innerHTML = '<p class="loading">Caricamento giochi...</p>';
-        const response = await fetch(appsScriptWebAppUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        allGames = await response.json();
-        allGames = allGames.filter(game => game.Titolo); // Assicura che ci sia un titolo
+        await openDatabase(); // Apre il database
+        allGames = await getAllGamesFromDB(); // Carica i giochi da IndexedDB
 
-        // Aggiorna il titolo del sito con la data di aggiornamento dell'app
         if (appLastUpdated) {
             siteTitleElement.innerHTML = `Tracker Videogiochi di FeF <span class="header-update-info">(Aggiornato: ${formatAppUpdateDate(appLastUpdated)})</span>`;
         } else {
@@ -43,8 +144,8 @@ async function fetchGames() {
         displayGames(allGames);
         populateFilters(allGames);
     } catch (error) {
-        console.error("Errore nel recupero dei giochi:", error);
-        gameListDiv.innerHTML = '<p class="loading error">Errore nel caricamento dei giochi. Controlla la console del browser per dettagli.</p>';
+        console.error("Errore nel caricamento dei giochi:", error);
+        gameListDiv.innerHTML = '<p class="loading error">Errore nel caricamento dei giochi. Controlla la console del browser.</p>';
     }
 }
 
@@ -59,130 +160,24 @@ function displayGames(gamesToDisplay) {
     gamesToDisplay.forEach(game => {
         const gameCard = document.createElement('div');
         gameCard.classList.add('game-card');
+        gameCard.dataset.id = game.id; // Salva l'ID del gioco per la modifica/eliminazione
 
         if (game.Stato) {
             const statusClass = game.Stato.replace(/[^a-zA-Z0-9]/g, '');
             gameCard.classList.add(`status-${statusClass}`);
         }
 
-        const starsColor = game.Voto >= 90 ? 'gold' :
-                           game.Voto >= 70 ? 'silver' :
-                           game.Voto >= 50 ? 'bronze' : 'gray';
+        const starsColor = game.VotoTotale >= 90 ? 'gold' :
+                           game.VotoTotale >= 70 ? 'silver' :
+                           game.VotoTotale >= 50 ? 'bronze' : 'gray';
 
-        // --- NOMI COLONNA AGGIORNATI PER CORRISPONDERE AL TUO FOGLIO (Voto Aesthetic, Ore di gioco) ---
         const gameHeaderContent = `
-            ${game['Voto Totale'] ? `⭐ ${game['Voto Totale']}` : ''}
-            ${game['Voto Aesthetic'] ? ` 🌌 ${game['Voto Aesthetic']}` : ''} 
-            ${game['Voto OST'] ? ` 🎶 ${game['Voto OST']}` : ''}
-            ${game['Ore di gioco'] ? ` ⏳ ${game['Ore di gioco']}h` : ''} `.trim(); // Rimuovi spazi extra all'inizio/fine
+            ${game.VotoTotale ? `⭐ ${game.VotoTotale}` : ''}
+            ${game.VotoAesthetic ? ` 🌌 ${game.VotoAesthetic}` : ''}
+            ${game.VotoOST ? ` 🎶 ${game.VotoOST}` : ''}
+            ${game.OreDiGioco ? ` ⏳ ${game.OreDiGioco}h` : ''}
+        `.trim();
 
         gameCard.innerHTML = `
             <div class="header-info">
-                <h2>${game.Titolo || 'Nome Sconosciuto'}</h2>
-                <span class="status-badge">${game.Stato || 'N/D'}</span>
-            </div>
-            <div class="platform-info">
-                <span><i class="fas fa-desktop"></i> ${game.Piattaforma || 'N/D'}</span>
-                ${game.Digitale === true ? ' | <i class="fas fa-download"></i> Digitale' : ''}
-            </div>
-            <div class="card-stats-header">
-                ${gameHeaderContent || '<span class="no-stats-info">Nessun dato statistico</span>'}
-            </div>
-            <img src="${game.Cover || '/fedetheang-tracker/placeholder.png'}" alt="${game.Titolo || 'No Image'}">
-
-            <div class="stats-row">
-                ${game.Voto ? `<div class="stat-item"><span class="stat-icon" style="color: ${starsColor};"><i class="fas fa-star"></i></span> ${game.Voto}</div>` : ''}
-                ${game['Voto Difficoltà'] ? `<div class="stat-item"><span class="stat-icon"><i class="fas fa-dumbbell"></i></span> ${game['Voto Difficoltà']}</div>` : ''}
-                </div>
-
-            ${game.Recensione ? `<p class="description">${game.Recensione}</p>` : ''}
-
-            <div class="footer-info">
-                <span>
-                    ${game.Anno ? `<i class="fas fa-calendar-alt"></i> ~${game.Anno}` : ''}
-                    ${game.Genere ? ` | <i class="fas fa-gamepad"></i> ${game.Genere}` : ''}
-                    ${game.Costo ? ` | <i class="fas fa-euro-sign"></i> ${game.Costo}` : ''}
-                </span>
-                <span class="footer-icons">
-                    ${game['% trofei'] ? `<span title="Percentuale Trofei"><i class="fas fa-trophy"></i> ${game['% trofei']}</span>` : ''}
-                    ${game['Platino/Completato'] ? `<span title="Platino/Completato"><i class="fas fa-check-circle"></i></span>` : ''}
-                    ${game.Backlog ? `<span title="Nel Backlog"><i class="fas fa-book"></i></span>` : ''}
-                    ${game.Rank ? `<span title="Rank"><i class="fas fa-medal"></i> ${game.Rank}</span>` : ''}
-                </span>
-            </div>
-        `;
-        gameListDiv.appendChild(gameCard);
-    });
-}
-
-function applyFilters() {
-    const searchText = searchInput.value.toLowerCase();
-    const selectedStatus = statusFilter.value;
-    const selectedPlatform = platformFilter.value;
-
-    const filteredGames = allGames.filter(game => {
-        const matchesSearch = game.Titolo ? game.Titolo.toLowerCase().includes(searchText) : false;
-        const matchesStatus = selectedStatus ? game.Stato === selectedStatus : true;
-        const matchesPlatform = selectedPlatform ? game.Piattaforma === selectedPlatform : true;
-        return matchesSearch && matchesStatus && matchesPlatform;
-    });
-
-    displayGames(filteredGames);
-}
-
-function populateFilters(games) {
-    const platforms = new Set();
-    games.forEach(game => {
-        if (game.Piattaforma) {
-            platforms.add(game.Piattaforma);
-        }
-    });
-
-    platformFilter.innerHTML = '<option value="">Tutte le Piattaforme</option>'; // Reset
-    Array.from(platforms).sort().forEach(platform => {
-        const option = document.createElement('option');
-        option.value = platform;
-        option.textContent = platform;
-        platformFilter.appendChild(option);
-    });
-}
-
-
-// Event Listeners per i filtri
-searchInput.addEventListener('input', applyFilters);
-statusFilter.addEventListener('change', applyFilters);
-platformFilter.addEventListener('change', applyFilters);
-
-
-// Scroll to Top Button logic
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 200) { // Mostra il bottone dopo 200px di scroll
-        scrollToTopBtn.style.display = 'flex';
-    } else {
-        scrollToTopBtn.style.display = 'none';
-    }
-});
-
-scrollToTopBtn.addEventListener('click', () => {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth' // Animazione di scorrimento
-    });
-});
-
-
-// Carica i giochi all'avvio
-fetchGames();
-
-// Registra il Service Worker per le funzionalità PWA (offline, installazione)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/fedetheang-tracker/service-worker.js')
-            .then(registration => {
-                console.log('Service Worker registrato con successo:', registration);
-            })
-            .catch(error => {
-                console.error('Registrazione Service Worker fallita:', error);
-            });
-    });
-}
+                <h2><span class="math-inline">\{game\.Titolo \|\| 'Nome Sconosciuto'\}</h2\>
