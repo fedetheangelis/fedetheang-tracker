@@ -3,38 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker Videogiochi FeF</title>
+    <title>Tracker Videogiochi di FeF</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="/fedetheang-tracker/manifest.json">
-    <link rel="icon" href="/fedetheang-tracker/icon.png">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-</head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50"> </head>
 <body>
     <header>
-        <h1 id="siteTitle">Tracker Videogiochi di FeF</h1>
+        <h1 id="siteTitle">Tracker Videogiochi di FeF <span class="header-update-info"></span></h1>
         <div class="filters">
-            <input type="text" id="searchInput" placeholder="Cerca giochi...">
+            <input type="text" id="searchInput" placeholder="Cerca per titolo...">
             <select id="statusFilter">
                 <option value="">Tutti gli Stati</option>
-                <option value="Attivo">Attivo</option>
-                <option value="Online/Senza Fine">Online/Senza Fine</option>
-                <option value="Messo in Pausa">Messo in Pausa</option>
-                <option value="Finito">Finito</option>
+                <option value="Completato">Completato</option>
+                <option value="In Corso">In Corso</option>
+                <option value="Backlog">Backlog</option>
+                <option value="Abbandonato">Abbandonato</option>
             </select>
             <select id="platformFilter">
                 <option value="">Tutte le Piattaforme</option>
                 </select>
         </div>
     </header>
-    <main id="gameList">
-        <p class="loading">Caricamento giochi...</p>
-        </main>
-    <footer>
-        <p>&copy; 2025 fedetheangelis </p>
-    </footer>
 
-    <button id="scrollToTopBtn" class="scroll-to-top" title="Scorri in alto">&#9650;</button>
+    <main id="gameList">
+        </main>
+
+    <button id="scrollToTopBtn" class="scroll-to-top" title="Torna su">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Aggiungi/Modifica Gioco</h2>
+            <form id="gameForm">
+                <label for="formTitle">Titolo:</label>
+                <input type="text" id="formTitle" required>
+                <button type="button" id="searchRawgBtn">Cerca Immagine (RAWG)</button>
+                <div id="rawgSearchResults" class="rawg-results">
+                    </div>
+                <img id="previewCover" src="./placeholder.png" alt="Anteprima Cover" class="preview-cover">
+                <input type="hidden" id="formCover"> <input type="hidden" id="formGameId"> <label for="formStatus">Stato:</label>
+                <select id="formStatus">
+                    <option value="Backlog">Backlog</option>
+                    <option value="In Corso">In Corso</option>
+                    <option value="Completato">Completato</option>
+                    <option value="Abbandonato">Abbandonato</option>
+                </select>
+
+                <label for="formPlatform">Piattaforma:</label>
+                <input type="text" id="formPlatform">
+
+                <label for="formVotoTotale">Voto Totale (0-100):</label>
+                <input type="number" id="formVotoTotale" min="0" max="100">
+
+                <label for="formVotoAesthetic">Voto Aesthetic (0-100):</label>
+                <input type="number" id="formVotoAesthetic" min="0" max="100">
+
+                <label for="formVotoOST">Voto OST (0-100):</label>
+                <input type="number" id="formVotoOST" min="0" max="100">
+
+                <label for="formOreDiGioco">Ore di gioco:</label>
+                <input type="number" id="formOreDiGioco" min="0">
+
+                <label for="formAnno">Anno di uscita:</label>
+                <input type="number" id="formAnno" min="1950" max="2100">
+
+                <label for="formGenere">Genere:</label>
+                <input type="text" id="formGenere">
+
+                <label for="formCosto">Costo (€):</label>
+                <input type="number" id="formCosto" step="0.01" min="0">
+
+                <label for="formRecensione">Recensione:</label>
+                <textarea id="formRecensione"></textarea>
+
+                <label for="formVotoDifficolta">Voto Difficoltà (1-10):</label>
+                <input type="number" id="formVotoDifficolta" min="1" max="10">
+
+                <label for="formPercentualeTrofei">% Trofei:</label>
+                <input type="number" id="formPercentualeTrofei" min="0" max="100">
+
+                <input type="checkbox" id="formPlatinoCompletato">
+                <label for="formPlatinoCompletato">Platino/Completato</label>
+
+                <input type="checkbox" id="formDigitale">
+                <label for="formDigitale">Digitale</label>
+
+                <input type="checkbox" id="formBacklog">
+                <label for="formBacklog">Nel Backlog</label>
+
+                <label for="formRank">Rank:</label>
+                <input type="number" id="formRank" min="1">
+
+                <button type="submit">Salva Gioco</button>
+            </form>
+        </div>
+    </div>
+
+    <button id="addGameBtn" class="add-game-button" title="Aggiungi nuovo gioco">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <div style="margin: 30px auto; text-align: center;">
+        <label for="csvFileInput" style="display: block; margin-bottom: 10px; font-weight: bold;">Importa dati da CSV/TSV (Una Tantum):</label>
+        <input type="file" id="csvFileInput" accept=".csv, .tsv" style="margin-right: 10px;">
+        <button id="startCsvImportBtn" style="padding: 8px 15px; background-color: #f39c12; color: white; border: none; border-radius: 5px; cursor: pointer;">Avvia Importazione</button>
+        <p id="csvImportStatus" style="margin-top: 10px; color: #555;"></p>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Tracker Videogiochi di FeF</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
