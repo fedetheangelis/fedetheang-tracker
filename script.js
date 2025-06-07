@@ -72,7 +72,8 @@ function displayGames(gamesToDisplay) {
         // --- NOMI COLONNA AGGIORNATI PER CORRISPONDERE AL TUO FOGLIO (Voto Aesthetic, Ore di gioco) ---
         const gameHeaderContent = `
             ${game['Voto Totale'] ? `⭐ ${game['Voto Totale']}` : ''}
-            ${game['Voto Aesthetic'] ? ` 🌌 ${game['Voto Aesthetic']}` : ''} ${game['Voto OST'] ? ` 🎶 ${game['Voto OST']}` : ''}
+            ${game['Voto Aesthetic'] ? ` 🌌 ${game['Voto Aesthetic']}` : ''} 
+            ${game['Voto OST'] ? ` 🎶 ${game['Voto OST']}` : ''}
             ${game['Ore di gioco'] ? ` ⏳ ${game['Ore di gioco']}h` : ''} `.trim(); // Rimuovi spazi extra all'inizio/fine
 
         gameCard.innerHTML = `
