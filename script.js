@@ -5,7 +5,8 @@ const gameListDiv = document.getElementById('gameList');
 const searchInput = document.getElementById('searchInput');
 const statusFilter = document.getElementById('statusFilter');
 const platformFilter = document.getElementById('platformFilter');
-const scrollToTopBtn = document.getElementById('scrollToTopBtn'); // Nuovo elemento
+const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+const siteTitleElement = document.getElementById('siteTitle'); // Nuovo riferimento all'elemento del titolo
 
 let allGames = []; // Array per memorizzare tutti i giochi caricati
 
@@ -17,8 +18,16 @@ async function fetchGames() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         allGames = await response.json();
-        // Filtra giochi senza titolo o con dati incompleti, se necessario
         allGames = allGames.filter(game => game.Titolo); 
+
+        // NUOVA LOGICA: Recupera e imposta la data dell'ultimo aggiornamento nel titolo del sito
+        // Assumiamo che la data sia nel primo gioco (riga 2 del tuo foglio) nella colonna "Ultimo aggiornamento"
+        if (allGames.length > 0 && allGames[0]['Ultimo aggiornamento']) {
+            siteTitleElement.innerHTML = `Tracker Videogiochi di FeF <span class="header-update-info">(Aggiornato: ${allGames[0]['Ultimo aggiornamento']})</span>`;
+        } else {
+            siteTitleElement.innerHTML = `Tracker Videogiochi di FeF`; // Torna al titolo base se non c'è una data
+        }
+
         displayGames(allGames);
         populateFilters(allGames);
     } catch (error) {
@@ -48,12 +57,9 @@ function displayGames(gamesToDisplay) {
                            game.Voto >= 70 ? 'silver' : 
                            game.Voto >= 50 ? 'bronze' : 'gray'; 
 
-        // Recupera la data e ora dell'ultimo aggiornamento, se presente
-        const lastUpdate = game['Ultimo aggiornamento'] ? ` <span class="last-update-info">(Aggiornato: ${game['Ultimo aggiornamento']})</span>` : '';
-
         gameCard.innerHTML = `
             <div class="header-info">
-                <h2>${game.Titolo || 'Nome Sconosciuto'}${lastUpdate}</h2>
+                <h2>${game.Titolo || 'Nome Sconosciuto'}</h2>
                 <span class="status-badge">${game.Stato || 'N/D'}</span>
             </div>
             <div class="platform-info">
